@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "bayes-classifier": "^0.0.5",
+    "jointjs": "^3.4.4",
+    "js-levenshtein": "^1.1.6",
+    "rita": "^2.7.1",
+    "sweetalert": "^2.1.2"
+  }
+}
