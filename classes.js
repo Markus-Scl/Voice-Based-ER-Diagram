@@ -1,6 +1,4 @@
-var joint = require('jointjs')
 var class_buttons = require('./classes_buttons');
-var classifier = require('./classifier');
 const levenshtein = require('js-levenshtein');
 var swal = require('sweetalert');
 

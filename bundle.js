@@ -264,9 +264,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 };
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
 },{"process/browser.js":1,"timers":2}],3:[function(require,module,exports){
-var joint = require('jointjs')
 var class_buttons = require('./classes_buttons');
-var classifier = require('./classifier');
 const levenshtein = require('js-levenshtein');
 var swal = require('sweetalert');
 
@@ -842,7 +840,12 @@ function find_index_of_child_entity(elm, listOfLists){
     }
 }
 
-},{"./classes_buttons":4,"./classifier":5,"jointjs":7,"js-levenshtein":9,"sweetalert":12}],4:[function(require,module,exports){
+},{"./classes_buttons":4,"js-levenshtein":9,"sweetalert":12}],4:[function(require,module,exports){
+var jquery = require('jquery');
+var lodash = require('lodash');
+var backbone = require('backbone');
+var joint = require('jointjs');
+
 const ent_button = document.getElementById('ent_button');
 const rel_button = document.getElementById('rel_button');
 const attr_button = document.getElementById('attr_button');
@@ -979,7 +982,6 @@ function get_links_by_id(id){
     return null;
 }
 
-var joint = require('jointjs')
 
 var erd = joint.shapes.erd;
 
@@ -1587,7 +1589,7 @@ function writeTextInElement(){
     var elementType = String(currentElement.attributes.type);
     if(elementType.includes("Relationship")){
         var msg = document.getElementById("rel_input").value;
-        currentElement.attr("text/text", msg); 
+        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
     }else if(elementType.includes("Entity")){
         var msg = document.getElementById("ent_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
@@ -2096,7 +2098,7 @@ function updateIsaSelect(){
 }
 
 
-},{"jointjs":7}],5:[function(require,module,exports){
+},{"backbone":6,"jointjs":7,"jquery":8,"lodash":10}],5:[function(require,module,exports){
 //var BayesClassifier = require('bayes-classifier');
 var rita = require('rita');
 var classes = require('./classes');

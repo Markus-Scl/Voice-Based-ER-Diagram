@@ -1,3 +1,8 @@
+var jquery = require('jquery');
+var lodash = require('lodash');
+var backbone = require('backbone');
+var joint = require('jointjs');
+
 const ent_button = document.getElementById('ent_button');
 const rel_button = document.getElementById('rel_button');
 const attr_button = document.getElementById('attr_button');
@@ -134,7 +139,6 @@ function get_links_by_id(id){
     return null;
 }
 
-var joint = require('jointjs')
 
 var erd = joint.shapes.erd;
 
@@ -742,7 +746,7 @@ function writeTextInElement(){
     var elementType = String(currentElement.attributes.type);
     if(elementType.includes("Relationship")){
         var msg = document.getElementById("rel_input").value;
-        currentElement.attr("text/text", msg); 
+        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
     }else if(elementType.includes("Entity")){
         var msg = document.getElementById("ent_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
