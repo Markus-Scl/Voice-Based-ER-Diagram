@@ -1,4 +1,4 @@
-var joint = require('jointjs');
+var joint = require('../node_modules/jointjs');
 
 const ent_button = document.getElementById('ent_button');
 const rel_button = document.getElementById('rel_button');

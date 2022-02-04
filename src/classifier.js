@@ -1,5 +1,5 @@
 //var BayesClassifier = require('bayes-classifier');
-var rita = require('rita');
+var rita = require('../node_modules/rita');
 var classes = require('./classes');
 
 

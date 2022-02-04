@@ -1,6 +1,6 @@
 var class_buttons = require('./classes_buttons');
-const levenshtein = require('js-levenshtein');
-var swal = require('sweetalert');
+const levenshtein = require('../node_modules/js-levenshtein');
+var swal = require('../node_modules/sweetalert');
 
 
 
