@@ -1,6 +1,3 @@
-var jquery = require('jquery');
-var lodash = require('lodash');
-var backbone = require('backbone');
 var joint = require('jointjs');
 
 const ent_button = document.getElementById('ent_button');

@@ -841,9 +841,6 @@ function find_index_of_child_entity(elm, listOfLists){
 }
 
 },{"./classes_buttons":4,"js-levenshtein":9,"sweetalert":12}],4:[function(require,module,exports){
-var jquery = require('jquery');
-var lodash = require('lodash');
-var backbone = require('backbone');
 var joint = require('jointjs');
 
 const ent_button = document.getElementById('ent_button');
@@ -2098,7 +2095,7 @@ function updateIsaSelect(){
 }
 
 
-},{"backbone":6,"jointjs":7,"jquery":8,"lodash":10}],5:[function(require,module,exports){
+},{"jointjs":7}],5:[function(require,module,exports){
 //var BayesClassifier = require('bayes-classifier');
 var rita = require('rita');
 var classes = require('./classes');
