@@ -987,7 +987,7 @@ var graph = new joint.dia.Graph();
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawing-container'),
     width: '100%',
-    height: '725 px',
+    height: '77%',
     border: '4px solid black',
     model: graph,
     linkPinning: false,

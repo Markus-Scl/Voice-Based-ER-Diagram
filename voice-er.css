@@ -1,14 +1,17 @@
+.whole-site{
+    height: 100vh;
+}
 .drawing-container{
-    height: 725px;
+    height: 77%;
     border: 8px solid black;
 }
 .headline-container{
     background-color: black;
-    height: 80px;
+    height: 9%;
 }
 .actions-container{
     background-color: lightslategray;
-    height: 132px;
+    height: 14%;
     border: 8px solid black;
 }
 
