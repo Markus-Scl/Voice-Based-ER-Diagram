@@ -14,7 +14,7 @@ collections:
 
 # Handling Reading
 safe                : false
-include             : [".htaccess"]
+include             : [".htaccess","node_modules"]
 exclude             : ["Gemfile", "Gemfile.lock", "vendor/bundle/", "vendor/cache/", "vendor/gems/", "vendor/ruby/"]
 keep_files          : [".git", ".svn"]
 encoding            : "utf-8"
