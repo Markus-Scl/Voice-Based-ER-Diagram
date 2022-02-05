@@ -117,26 +117,6 @@ async function save_file(){
 }
 
 
-function get_elements_by_id(id){
-    var elementsList = graph.getElements();
-    for(i in elementsList){
-        if(elementsList[i].id == id){
-            return elementsList[i];
-        }
-    }
-    return null;
-}
-function get_links_by_id(id){
-    var linksList = graph.getLinks();
-    for(i in linksList){
-        if(linksList[i].id == id){
-            return linksList[i];
-        }
-    }
-    return null;
-}
-
-
 var erd = joint.shapes.erd;
 
 var graph = new joint.dia.Graph();
@@ -151,8 +131,6 @@ var paper = new joint.dia.Paper({
     highlighting: false,
     gridSize: 10,
     drawGrid: true,
-    //height: 700,
-    //width: 1000,
     background: {
         color: 'white'
     },
@@ -173,8 +151,6 @@ paper.options.restrictTranslate = function(cellView) {
     // move element inside the bounding box of the paper element only
    return cellView.paper.getArea();
 }
-
-//paper.setInteractivity('interactive')
 
 // Define a specific highligthing path for every shape.
 
@@ -235,86 +211,6 @@ erd.ISA.prototype.getConnectionPoint = function(referencePoint) {
     );
 };
 
-/*this.paper.on('element:pointerdown', function(elementView) {
-    resetAll(this);
-    var currentElement = elementView.model;
-    currentElement.attr('text/stroke', 'orange')
-});*/
-
-/*function resetAll(paper) {
-    paper.drawBackground({
-        color: 'white'
-    })
-
-    var elements = paper.model.getElements();
-    for (var i = 0, ii = elements.length; i < ii; i++) {
-        var currentElement = elements[i];
-        currentElement.attr('body/stroke', 'black');
-    }
-
-    var links = paper.model.getLinks();
-    for (var j = 0, jj = links.length; j < jj; j++) {
-        var currentLink = links[j];
-        currentLink.attr('line/stroke', 'black');
-        currentLink.label(0, {
-            attrs: {
-                body: {
-                    stroke: 'black'
-                }
-            }
-        })
-    }
-}*/
-/*function make_new_paper(new_graph){
-    var new_paper = new joint.dia.Paper({
-        el: document.getElementById('drawing-container'),
-        width: '100%',
-        height: '725 px',
-        border: '4px solid black',
-        model: new_graph,
-        linkPinning: false,
-        highlighting: false,
-        gridSize: 10,
-        drawGrid: true,
-        //height: 700,
-        //width: 1000,
-        background: {
-            color: 'white'
-        },
-        defaultConnectionPoint: function(line, view) {
-            var element = view.model;
-            return element.getConnectionPoint(line.start) || element.getBBox().center();
-        }
-    });
-    new_paper.on('element:pointerdown', function(cellView) {
-        highlightElement(cellView.model);
-        //console.log(cellView.model);
-    });
-    
-    new_paper.on('element:pointermove', function(cellView) {
-        highlightElement(cellView.model);
-        var elementType = String(currentElement.attributes.type);
-        if(elementType.includes("Entity")){
-            if(currentElement.attributes.isParentEntity){
-                
-                updateIsaPosition();
-            }
-        }
-    });
-    
-    new_paper.on('blank:pointerdown', function() {
-    
-        highlighter.remove();
-    });
-    new_paper.options.restrictTranslate = function(cellView) {
-        // move element inside the bounding box of the paper element only
-       return cellView.paper.getArea();
-    }
-    return new_paper;
-}*/
-
-//var posX = cellView.model.attributes.position.x;
-//var posY = cellView.model.attributes.position.y;
 function highlightElement(elm){
     currentElement = elm;
 
@@ -331,8 +227,7 @@ function highlightElement(elm){
     if(elementType.includes("Entity")){
         addOptionsToSelectIsA();
         updateIsaSelect();
-        //console.log(currentElement);
-        //document.getElementById("Button_Eingabe").style.visibility = "visible";
+
         document.getElementById("selectid_1").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Entity").style.visibility = "visible";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "hidden";
@@ -340,7 +235,6 @@ function highlightElement(elm){
         document.getElementById("ent_input").focus();
         document.getElementById("ent_input").value = currentElement.attr("text/text");
     }else if(elementType.includes("Normal")){
-        //document.getElementById("Button_Eingabe").style.visibility = "visible";
         document.getElementById("selectid_1").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Entity").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "visible";
@@ -351,7 +245,6 @@ function highlightElement(elm){
     }else if(elementType.includes("Relationship")){
         addOptionsToSelect();
         initializeSelectValues();
-        //document.getElementById("Button_Eingabe").style.visibility = "hidden";
         document.getElementById("selectid_1").style.visibility = "visible";
         document.getElementById("Eingabefeld-Entity").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "hidden";
@@ -365,7 +258,6 @@ function highlightElement(elm){
 
 paper.on('element:pointerdown', function(cellView) {
     highlightElement(cellView.model);
-    //console.log(cellView.model);
 });
 
 paper.on('element:pointermove', function(cellView) {
@@ -397,7 +289,7 @@ class Paper extends joint.dia.Paper {
        super(args_new);
    
     }
-   }
+}
 
 class Entity extends erd.Entity {
     constructor(args = {}) {
@@ -414,8 +306,7 @@ class Entity extends erd.Entity {
                     fill: '#000000',
                     text: '',
                     letterSpacing: 0,
-                    fontWeight: 'bold' /*,
-                    style: { textShadow: '1px 0 1px #333333' }*/
+                    fontWeight: 'bold'
                 },
                 '.outer': {
                     fill: '#ffaa63',
@@ -429,8 +320,6 @@ class Entity extends erd.Entity {
                 }
             }
         }
-        
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -446,8 +335,7 @@ class WeakEntity extends erd.WeakEntity {
                fill: '#000000',
                text: '',
                letterSpacing: 0,
-               fontWeight: 'bold'/*,
-               style: { textShadow: '1px 0 1px #333333' }*/
+               fontWeight: 'bold'
            },
            '.inner': {
                fill: '#ffaa63',
@@ -462,7 +350,6 @@ class WeakEntity extends erd.WeakEntity {
            }
        }
     }
-       //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }  
     
@@ -490,7 +377,6 @@ class IdentifyingRelationship extends erd.IdentifyingRelationship {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -517,7 +403,6 @@ class ISA extends erd.ISA {
         },
         size: {width: 30, height:30}
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -531,8 +416,7 @@ class Key extends erd.Key {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold'/*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.outer': {
                 fill: '#ffcb63',
@@ -545,7 +429,6 @@ class Key extends erd.Key {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -561,8 +444,7 @@ class Attribute extends erd.Normal {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold'/*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.outer': {
                 fill: '#ffcb63',
@@ -571,7 +453,6 @@ class Attribute extends erd.Normal {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -586,7 +467,6 @@ class Multivalued extends erd.Multivalued {
                 text: '',
                 letterSpacing: 0,
                 fontWeight: 'bold'
-                /*style: { 'text-shadow': '1px 0px 1px #333333' }*/
             },
             '.inner': {
                 fill: '#ffcb63',
@@ -602,7 +482,6 @@ class Multivalued extends erd.Multivalued {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -616,8 +495,7 @@ class Derived extends erd.Derived {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold' /*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.inner': {
                 fill: '#ffcb63',
@@ -632,7 +510,6 @@ class Derived extends erd.Derived {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -667,13 +544,46 @@ class Relationship extends erd.Relationship {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
 
 
 //Helpers
+//Find Objects
+function get_elements_by_id(id){
+    var elementsList = graph.getElements();
+    for(i in elementsList){
+        if(elementsList[i].id == id){
+            return elementsList[i];
+        }
+    }
+    return null;
+}
+function get_links_by_id(id){
+    var linksList = graph.getLinks();
+    for(i in linksList){
+        if(linksList[i].id == id){
+            return linksList[i];
+        }
+    }
+    return null;
+}
+
+function findAllEntities(){
+    const elementsList = graph.getElements();
+
+    var onlyEntities = [];
+    for(elm in elementsList){
+        var elementType = String(elementsList[elm].attributes.type);
+        if(elementType.includes("Entity")){
+            onlyEntities.push(elementsList[elm]);
+        }
+    }
+    return onlyEntities;
+}
+
+//Create Objects
 var createLink = function(elm1, elm2) {
     if(elm1 != null){
         var myLink = new erd.Line({
@@ -692,8 +602,6 @@ var createLink = function(elm1, elm2) {
     }
 };
 
-
-
 function createEntityType(){
     var ent_obj = new Entity();
     ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
@@ -705,6 +613,7 @@ function createEntityType(){
 
 function createAttributType(){
     var attr_obj = new Attribute();
+    //Every attribute-type knows its parent entity-type
     attr_obj.attributes.listParent.push(currentElement.id);
 
     attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
@@ -713,6 +622,7 @@ function createAttributType(){
     graph.addCell(attr_obj);
 
     createLink(currentElement, attr_obj);
+    //Every entity-tipe knows all of its children attribute-types
     currentElement.attributes.listChildren.push(attr_obj.id);
 
     highlightElement(attr_obj);
@@ -720,10 +630,12 @@ function createAttributType(){
 
 function createSubAttributType(){
     var sub_attr_obj = new Attribute();
+    //Every sub attribute-type knows its parent attribute
     sub_attr_obj.attributes.listParent.push(currentElement.id);
     sub_attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
         currentElement.position().y-120+Math.floor(Math.random()*240));
 
+    //Every attribute-type knowsnits children sub attribute-types
     currentElement.attributes.listChildren.push(sub_attr_obj.id);
     graph.addCell(sub_attr_obj);
     createLink(currentElement, sub_attr_obj);
@@ -743,7 +655,7 @@ function writeTextInElement(){
     var elementType = String(currentElement.attributes.type);
     if(elementType.includes("Relationship")){
         var msg = document.getElementById("rel_input").value;
-        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
+        currentElement.attr("text/text", msg); 
     }else if(elementType.includes("Entity")){
         var msg = document.getElementById("ent_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
@@ -753,20 +665,8 @@ function writeTextInElement(){
     } 
 }
 
-function findAllEntities(){
-    const elementsList = graph.getElements();
-
-    var onlyEntities = [];
-    for(elm in elementsList){
-        var elementType = String(elementsList[elm].attributes.type);
-        if(elementType.includes("Entity")){
-            onlyEntities.push(elementsList[elm]);
-        }
-    }
-    return onlyEntities;
-}
-
-var storedEntities = [];
+//Global dictionary of current entity-type names as key and the object as value
+var storedEntities = {};
 
 function addOptionsToSelect(){
     storedEntities = [];
@@ -774,11 +674,12 @@ function addOptionsToSelect(){
     
     var optionsContainer1 = document.getElementById("select1");
     var optionsContainer2 = document.getElementById("select3");
-
+    //Delete all previous stored options
     while(optionsContainer1.length > 1){
         optionsContainer1.remove(1);
         optionsContainer2.remove(1);
     }
+    //Add all entity-type names to select
     for(ent in allEntities){
         var option1 = document.createElement("option");
         option1.value = allEntities[ent].attr("text/text");
@@ -927,33 +828,6 @@ function updateLabelsOfConnection(){
     } 
 }
 
-//Frage: Wieso klappt bei einem .value und beim anderen nicht? Beim anderen klappt .text
-function initializeSelectValues(){
-
-    if(get_elements_by_id(currentElement.attributes.firstConnectionObject) != null){
-        var firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
-        document.getElementById("select1").value = firstConnectionObjectName;
-    }
-    if(get_links_by_id(currentElement.attributes.firstConnectionLink) != null){
-        var firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
-        firstLinkLabelName = firstLinkLabelName.trim();
-        //console.log(firstLinkLabelName);
-        //document.getElementById("select2").value = firstLinkLabelName;
-        $("#select2").val(firstLinkLabelName);
-    }
-    if(get_elements_by_id(currentElement.attributes.secondConnectionObject) != null){
-        var secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
-        document.getElementById("select3").value = secondConnectionObjectName;
-    }
-    if(get_links_by_id(currentElement.attributes.secondConnectionLink) != null){
-        var secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
-        secondLinkLabelName = secondLinkLabelName.trim();
-        //console.log(secondLinkLabelName);
-        //document.getElementById("select4").value = secondLinkLabelName;
-        $("#select4").val(secondLinkLabelName);
-    }
-}
-
 function updateValueLableDropdownListToValue_M(){
     var dropdownList = document.getElementById("select4");
     var option = document.createElement("option");
@@ -973,6 +847,30 @@ function updateValueLableDropdownListToValue_N(){
     dropdownList.remove(1);
     dropdownList.appendChild(option);
 }
+
+//This if for creating relationship-types with select buttons
+function initializeSelectValues(){
+
+    if(get_elements_by_id(currentElement.attributes.firstConnectionObject) != null){
+        var firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
+        document.getElementById("select1").value = firstConnectionObjectName;
+    }
+    if(get_links_by_id(currentElement.attributes.firstConnectionLink) != null){
+        var firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
+        firstLinkLabelName = firstLinkLabelName.trim();
+        $("#select2").val(firstLinkLabelName);
+    }
+    if(get_elements_by_id(currentElement.attributes.secondConnectionObject) != null){
+        var secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
+        document.getElementById("select3").value = secondConnectionObjectName;
+    }
+    if(get_links_by_id(currentElement.attributes.secondConnectionLink) != null){
+        var secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
+        secondLinkLabelName = secondLinkLabelName.trim();
+        $("#select4").val(secondLinkLabelName);
+    }
+}
+
 function deleteElement(elm){
     console.log(elm);
     var type = String(elm.type);
@@ -995,54 +893,45 @@ function deleteElement(elm){
         highlighter.remove();
     }
 }
-module.exports = {
-    erd:erd,
-    graph:graph,
-    paper:paper,
-    highlighter: highlighter,
-    Entity:Entity,
-    WeakEntity:WeakEntity,
-    Attribute:Attribute,
-    Relationship:Relationship,
-    ISA:ISA,
-    highlightElement:highlightElement,
-    createLink:createLink,
-    deleteElement:deleteElement,
-    updateIsaPosition:updateIsaPosition,
-    findAllEntities: findAllEntities
-}
+
 function deleteAttribute(elm){
-    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> don't deletes every node
+    //Get the duplicate of the list, else you change dinamically the list you iterate through --> don't deletes every node
     var listAllChildren = elm.attributes.listChildren.slice();
 
     var parent = get_elements_by_id(elm.attributes.listParent[0]);
     var parentChildList = parent.attributes.listChildren;
 
+    //Find index of attribute in the entity-types child list
     var index = findIndexInList(elm, parentChildList);
+    //Delete childnode from list of the parent
+    parentChildList.splice(index,1);
     
+    //Delete children of attribute and their children
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
     }
-    //Delete childnode from list of the parent
-    parentChildList.splice(index,1);
+    
     
 }
 
 function deleteEntity(elm){
     var isaParentEntity = elm.attributes.isParentEntity;
-    //This is a Parent-Entity, have to remove all connections to its children and the information of ConnectionToParent in chihldnode
+    //This is a Parent-Entity (other entity-types inherit), and doesn't inherit from other entity-type. Have to remove all connections to its children and the information of ConnectionToParent in chihldnode (entity-type)
     if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length == 0){
         removeChildrenInheritance(elm);
+    //Is parent entity-type and inhertits from other entity-type
     }else if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length > 0){
         removeChildrenInheritance(elm);
         removeParentInheritance(elm);
     }
     else{
+        //Only inherits form other entity-type --> has no entity-type children
         if(elm.attributes.inhertitanceConnectionToParent.length > 0){
             removeParentInheritance(elm);
         }
     }
-    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> don't deletes every node
+    //Delete all of the entity-types children(attributes)
+    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> doesn't delete every node
     var listAllChildren = elm.attributes.listChildren.slice();  
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
@@ -1053,6 +942,7 @@ function removeChildrenInheritance(elm){
     var childList = elm.attributes.inhertitanceConnectionsToChildren;
     for(childConnection in childList){
         var child = get_elements_by_id(childList[childConnection][0]);
+        //Delete informatin about its parent entity-type
         child.attributes.inhertitanceConnectionToParent = [];
         var isa = get_elements_by_id(childList[childConnection][1]);
         var isaLink = get_links_by_id(childList[childConnection][2]);
@@ -1066,24 +956,12 @@ function removeParentInheritance(elm){
     var isaLink = get_links_by_id(elm.attributes.inhertitanceConnectionToParent[2]);
     var childListOfParent = parent.attributes.inhertitanceConnectionsToChildren;
 
-    removeConnectionFromChildlist(elm, childListOfParent);
+    //Delete information about child entity-type in parent
+    childListOfParent = removeConnectionFromChildlist(elm, childListOfParent);
     if(childListOfParent.length == 0){
         parent.attributes.isParentEntity = false;
     }
     graph.removeCells(isa,isaLink);
-}
-
-function deleteRelationship(elm){
-    var firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    var secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
-
-    graph.removeCells(firstLink);
-    graph.removeCells(secondLink);
-
-    var listAllChildren = elm.attributes.listChildren.slice();  
-    for (child in listAllChildren){
-        deleteElement(get_elements_by_id(listAllChildren[child]));
-    }
 }
 
 function removeConnectionFromChildlist(elm, list){
@@ -1112,6 +990,21 @@ function findIndexInList(elm, list){
         }
     }
 }
+
+function deleteRelationship(elm){
+    var firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    var secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+
+    graph.removeCells(firstLink);
+    graph.removeCells(secondLink);
+
+    var listAllChildren = elm.attributes.listChildren.slice();  
+    for (child in listAllChildren){
+        deleteElement(get_elements_by_id(listAllChildren[child]));
+    }
+}
+
+
 function actionOnAttributeForMultivalued(){
     var checkbox1 = document.getElementById("checkbox1");
     var checkbox2 = document.getElementById("checkbox2");
@@ -1142,11 +1035,7 @@ function actionOnAttributeForPrimaryKey(){
     }
 }
 
-
-//Frage: Nur Eigenschaften des Objektes werden geändert, aber nicht der Typ. Wie macht man es richtig?
 function makeAttributeMultivalued(){
-    //var text = currentElement.attributes.attrs.text.text;
-    //var bla = new Multivalued(currentElement.attributes);
     currentElement.attr(".inner/display", "block");
     currentElement.attr(".inner/fill", "#ffcb63");
     currentElement.attr(".inner/stroke", "#797d9a");
@@ -1193,7 +1082,6 @@ function createISA(){
     var connectionObject = storedEntitiesISA[selectValue];
     if(currentElement.attributes.inhertitanceConnectionToParent.length == 0){
         makeNewIsaConnection(currentElement, connectionObject);
-        //console.log(connectionObject);
     // Entity is alreday inherited, but user select to undo the inheritance
     }else if(selectValue == "" && currentElement.attributes.inhertitanceConnectionToParent.length > 0){
         changeIsaConnections(currentElement);
@@ -1251,3 +1139,19 @@ function updateIsaSelect(){
     
 }
 
+module.exports = {
+    erd:erd,
+    graph:graph,
+    paper:paper,
+    highlighter: highlighter,
+    Entity:Entity,
+    WeakEntity:WeakEntity,
+    Attribute:Attribute,
+    Relationship:Relationship,
+    ISA:ISA,
+    highlightElement:highlightElement,
+    createLink:createLink,
+    deleteElement:deleteElement,
+    updateIsaPosition:updateIsaPosition,
+    findAllEntities: findAllEntities
+}

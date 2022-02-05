@@ -32646,10 +32646,10 @@ var paper = class_buttons.paper;
 var highlighter = class_buttons.highlighter;
 
 //Helpers
-//Helper functions to find objects by name
 function get_levenshtein(word_input, name_object){
     return [levenshtein(word_input, name_object)/word_input.length, name_object];
 }
+//Helper functions to find objects by name
 function find_entity_object_by_name(name_entity){
     if(name_entity != null){
         const elementsList = graph.getElements();
@@ -32658,12 +32658,14 @@ function find_entity_object_by_name(name_entity){
             var elementType = String(elementsList[elm].attributes.type);
             if(elementType.includes("Entity")){
                 element_name = elementsList[elm].attr("text/text");
+                //Calculate difference between words
                 list_lev.push(get_levenshtein(name_entity, element_name));
                 if(element_name == name_entity){
                     return elementsList[elm];
                 }
             }
         }
+        //Didn't understand the right word from user input, takes the closest word instead (if there is one)
         list_lev.sort();
         if(list_lev[0][0] < 1){
             var closest_word = list_lev[0][1];
@@ -32696,7 +32698,7 @@ function find_attribute_object_by_name(name_attribute){
         list_lev.sort();
         if(list_lev[0][0] < 1){
             var closest_word = list_lev[0][1];
-            var attr_obj = find_entity_object_by_name(closest_word);
+            var attr_obj = find_attribute_object_by_name(closest_word);
             return [attr_obj];
         }else{
             return null;
@@ -32723,14 +32725,14 @@ function find_attribute_of_object(ent_obj, name_attribute){
     }
 }
 
-function find_relationship(name_second_entity, ent_obj){
+/*function find_relationship(name_second_entity, ent_obj){
     list_rel = ent_obj.attributes.relationship_object;
     for(rel in rel_obj){
         if(rel_obj[rel][2].attr("text/text") == name_second_entity){
             return rel_obj[rel][1];
         }
     }
-}
+}*/
 
 function find_object_by_name(name_object){
     var elementsList = graph.getElements();
@@ -32743,7 +32745,6 @@ function find_object_by_name(name_object){
             match_elements.push(elementsList[elm]);
         }
     }
-
     /*if(match_elements.length == 0){
         list_lev.sort();
         if(list_lev[0][0] < 1){
@@ -32780,7 +32781,6 @@ function get_links_by_id(id){
 }
 
 //Functions for creating object
-
 function create_isa_type(name_child, name_parent){
     var child_ent = find_entity_object_by_name(name_child);
     var parent_ent = find_entity_object_by_name(name_parent);
@@ -32802,8 +32802,6 @@ function create_entity_type(name_entity){
 
         graph.addCell(ent_obj);
         class_buttons.highlightElement(ent_obj);
-    }else{
-        //console.log('What is the name of the entity?');
     }
 }
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
@@ -32831,8 +32829,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
             class_buttons.createLink(ent_obj, attr_obj);
             ent_obj.attributes.listChildren.push(attr_obj.id);
             class_buttons.highlightElement(attr_obj);
-        }else{
-            //console.log("else");
+        }else if(currentElement != null){
             attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
                 currentElement.position().y-120+Math.floor(Math.random()*240));
                 
@@ -32867,8 +32864,6 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
     //There are more attributes with that name
     }else{
         if(name_entity == null){
-            //console.log("There are multiple attributes with the name \"" + name_attribute + "\"");
-            //console.log("Please mention the name of the entity aswell!");
             swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
         }else{
             var ent_obj = find_entity_object_by_name(name_entity);
@@ -32902,11 +32897,11 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
 function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
     
     var ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    //console.log(ent_obj_1);
+    
     var ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    //console.log(ent_obj_2);
+    
 
-    //Every entity knows their whole relationsships
+    //Every entity-type knows their whole relationsships
     if(ent_obj_1 != null && ent_obj_2 != null){
         var rel_obj = new class_buttons.Relationship();
         rel_obj.attr("text/text", name_relationship);
@@ -32958,21 +32953,6 @@ function swal_to_user(input1, input2){
     
 }
 
-module.exports = {
-    create_entity_type: create_entity_type,
-    create_attribute_type: create_attribute_type,
-    create_relationship_type: create_relationship_type,
-    add_label_to_connection: add_label_to_connection,
-    create_sub_attribute_type: create_sub_attribute_type,
-    create_isa_type: create_isa_type,
-    delete_object: delete_object,
-    rename_object: rename_object,
-    make_primary_key: make_primary_key,
-    undo_primary_key: undo_primary_key,
-    make_multi_valued: make_multi_valued,
-    undo_multi_valued: undo_multi_valued,
-    swal_to_user: swal_to_user
-}
 //Helpers to change appearance of objects
 function make_primary_key(name_attr){
     var attr_objs = find_attribute_object_by_name(name_attr);
@@ -32989,8 +32969,6 @@ function make_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to make as primary key and repeat your sentence');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
             }
         }
@@ -33012,8 +32990,6 @@ function undo_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to undo primary key');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
             }
         }
@@ -33036,8 +33012,6 @@ function make_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to make multi valued and repeat your sentence');
                 swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
             }
         }
@@ -33061,8 +33035,6 @@ function undo_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to undo primary key');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
             }
         }
@@ -33087,8 +33059,6 @@ function rename_object(old_name, new_name){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple objects with the name \"' + old_name +"\"");
-                //console.log('Please click on the object you want to rename and repeat your sentence');
                 swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
             }
         }
@@ -33109,16 +33079,12 @@ function delete_object(name_object){
             }
         }
         if(found_elm == false){
-            //console.log("There are multiple objects with the name \"" + name_object + "\".");
-            //console.log("Please click on the object you want to delete and repeat the sentence");
             swal("There are multiple objects with the name \"" + name_object + "\".", "Please click on the object you want to delete and repeat your sentence!");
         }
     }  
 }
 
 function makeAttributeMultivalued(attr_obj){
-    //var text = currentElement.attributes.attrs.text.text;
-    //var bla = new Multivalued(currentElement.attributes);
     attr_obj.attr(".inner/display", "block");
     attr_obj.attr(".inner/fill", "#ffcb63");
     attr_obj.attr(".inner/stroke", "#797d9a");
@@ -33151,15 +33117,12 @@ function add_label_to_connection(name_entity_1, name_entity_2, val_number){
 function check_and_update_label(link, value_to_insert){
    var value_label = link.attributes.labels[0].attrs.text.text;
    if(value_to_insert == '1' && value_label == "M\n"){
-       //console.log("1 if");
         link.set(create_label("N"));
         return value_to_insert;
    }else if(value_to_insert == 'N' && value_label == "N\n"){
-      //console.log("2 if");
         value_to_insert = "M";
         return value_to_insert;
     }else{
-       //console.log("else");
         return value_to_insert;
     }
 }
@@ -33210,6 +33173,21 @@ function find_index_of_child_entity(elm, listOfLists){
     }
 }
 
+module.exports = {
+    create_entity_type: create_entity_type,
+    create_attribute_type: create_attribute_type,
+    create_relationship_type: create_relationship_type,
+    add_label_to_connection: add_label_to_connection,
+    create_sub_attribute_type: create_sub_attribute_type,
+    create_isa_type: create_isa_type,
+    delete_object: delete_object,
+    rename_object: rename_object,
+    make_primary_key: make_primary_key,
+    undo_primary_key: undo_primary_key,
+    make_multi_valued: make_multi_valued,
+    undo_multi_valued: undo_multi_valued,
+    swal_to_user: swal_to_user
+}
 },{"../node_modules/js-levenshtein":6,"../node_modules/sweetalert":9,"./classes_buttons":12}],12:[function(require,module,exports){
 var joint = require('../node_modules/jointjs');
 
@@ -33330,26 +33308,6 @@ async function save_file(){
 }
 
 
-function get_elements_by_id(id){
-    var elementsList = graph.getElements();
-    for(i in elementsList){
-        if(elementsList[i].id == id){
-            return elementsList[i];
-        }
-    }
-    return null;
-}
-function get_links_by_id(id){
-    var linksList = graph.getLinks();
-    for(i in linksList){
-        if(linksList[i].id == id){
-            return linksList[i];
-        }
-    }
-    return null;
-}
-
-
 var erd = joint.shapes.erd;
 
 var graph = new joint.dia.Graph();
@@ -33364,8 +33322,6 @@ var paper = new joint.dia.Paper({
     highlighting: false,
     gridSize: 10,
     drawGrid: true,
-    //height: 700,
-    //width: 1000,
     background: {
         color: 'white'
     },
@@ -33386,8 +33342,6 @@ paper.options.restrictTranslate = function(cellView) {
     // move element inside the bounding box of the paper element only
    return cellView.paper.getArea();
 }
-
-//paper.setInteractivity('interactive')
 
 // Define a specific highligthing path for every shape.
 
@@ -33448,86 +33402,6 @@ erd.ISA.prototype.getConnectionPoint = function(referencePoint) {
     );
 };
 
-/*this.paper.on('element:pointerdown', function(elementView) {
-    resetAll(this);
-    var currentElement = elementView.model;
-    currentElement.attr('text/stroke', 'orange')
-});*/
-
-/*function resetAll(paper) {
-    paper.drawBackground({
-        color: 'white'
-    })
-
-    var elements = paper.model.getElements();
-    for (var i = 0, ii = elements.length; i < ii; i++) {
-        var currentElement = elements[i];
-        currentElement.attr('body/stroke', 'black');
-    }
-
-    var links = paper.model.getLinks();
-    for (var j = 0, jj = links.length; j < jj; j++) {
-        var currentLink = links[j];
-        currentLink.attr('line/stroke', 'black');
-        currentLink.label(0, {
-            attrs: {
-                body: {
-                    stroke: 'black'
-                }
-            }
-        })
-    }
-}*/
-/*function make_new_paper(new_graph){
-    var new_paper = new joint.dia.Paper({
-        el: document.getElementById('drawing-container'),
-        width: '100%',
-        height: '725 px',
-        border: '4px solid black',
-        model: new_graph,
-        linkPinning: false,
-        highlighting: false,
-        gridSize: 10,
-        drawGrid: true,
-        //height: 700,
-        //width: 1000,
-        background: {
-            color: 'white'
-        },
-        defaultConnectionPoint: function(line, view) {
-            var element = view.model;
-            return element.getConnectionPoint(line.start) || element.getBBox().center();
-        }
-    });
-    new_paper.on('element:pointerdown', function(cellView) {
-        highlightElement(cellView.model);
-        //console.log(cellView.model);
-    });
-    
-    new_paper.on('element:pointermove', function(cellView) {
-        highlightElement(cellView.model);
-        var elementType = String(currentElement.attributes.type);
-        if(elementType.includes("Entity")){
-            if(currentElement.attributes.isParentEntity){
-                
-                updateIsaPosition();
-            }
-        }
-    });
-    
-    new_paper.on('blank:pointerdown', function() {
-    
-        highlighter.remove();
-    });
-    new_paper.options.restrictTranslate = function(cellView) {
-        // move element inside the bounding box of the paper element only
-       return cellView.paper.getArea();
-    }
-    return new_paper;
-}*/
-
-//var posX = cellView.model.attributes.position.x;
-//var posY = cellView.model.attributes.position.y;
 function highlightElement(elm){
     currentElement = elm;
 
@@ -33544,8 +33418,7 @@ function highlightElement(elm){
     if(elementType.includes("Entity")){
         addOptionsToSelectIsA();
         updateIsaSelect();
-        //console.log(currentElement);
-        //document.getElementById("Button_Eingabe").style.visibility = "visible";
+
         document.getElementById("selectid_1").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Entity").style.visibility = "visible";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "hidden";
@@ -33553,7 +33426,6 @@ function highlightElement(elm){
         document.getElementById("ent_input").focus();
         document.getElementById("ent_input").value = currentElement.attr("text/text");
     }else if(elementType.includes("Normal")){
-        //document.getElementById("Button_Eingabe").style.visibility = "visible";
         document.getElementById("selectid_1").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Entity").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "visible";
@@ -33564,7 +33436,6 @@ function highlightElement(elm){
     }else if(elementType.includes("Relationship")){
         addOptionsToSelect();
         initializeSelectValues();
-        //document.getElementById("Button_Eingabe").style.visibility = "hidden";
         document.getElementById("selectid_1").style.visibility = "visible";
         document.getElementById("Eingabefeld-Entity").style.visibility = "hidden";
         document.getElementById("Eingabefeld-Attribute").style.visibility = "hidden";
@@ -33578,7 +33449,6 @@ function highlightElement(elm){
 
 paper.on('element:pointerdown', function(cellView) {
     highlightElement(cellView.model);
-    //console.log(cellView.model);
 });
 
 paper.on('element:pointermove', function(cellView) {
@@ -33610,7 +33480,7 @@ class Paper extends joint.dia.Paper {
        super(args_new);
    
     }
-   }
+}
 
 class Entity extends erd.Entity {
     constructor(args = {}) {
@@ -33627,8 +33497,7 @@ class Entity extends erd.Entity {
                     fill: '#000000',
                     text: '',
                     letterSpacing: 0,
-                    fontWeight: 'bold' /*,
-                    style: { textShadow: '1px 0 1px #333333' }*/
+                    fontWeight: 'bold'
                 },
                 '.outer': {
                     fill: '#ffaa63',
@@ -33642,8 +33511,6 @@ class Entity extends erd.Entity {
                 }
             }
         }
-        
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -33659,8 +33526,7 @@ class WeakEntity extends erd.WeakEntity {
                fill: '#000000',
                text: '',
                letterSpacing: 0,
-               fontWeight: 'bold'/*,
-               style: { textShadow: '1px 0 1px #333333' }*/
+               fontWeight: 'bold'
            },
            '.inner': {
                fill: '#ffaa63',
@@ -33675,7 +33541,6 @@ class WeakEntity extends erd.WeakEntity {
            }
        }
     }
-       //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }  
     
@@ -33703,7 +33568,6 @@ class IdentifyingRelationship extends erd.IdentifyingRelationship {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -33730,7 +33594,6 @@ class ISA extends erd.ISA {
         },
         size: {width: 30, height:30}
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -33744,8 +33607,7 @@ class Key extends erd.Key {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold'/*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.outer': {
                 fill: '#ffcb63',
@@ -33758,7 +33620,6 @@ class Key extends erd.Key {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }     
 }
@@ -33774,8 +33635,7 @@ class Attribute extends erd.Normal {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold'/*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.outer': {
                 fill: '#ffcb63',
@@ -33784,7 +33644,6 @@ class Attribute extends erd.Normal {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -33799,7 +33658,6 @@ class Multivalued extends erd.Multivalued {
                 text: '',
                 letterSpacing: 0,
                 fontWeight: 'bold'
-                /*style: { 'text-shadow': '1px 0px 1px #333333' }*/
             },
             '.inner': {
                 fill: '#ffcb63',
@@ -33815,7 +33673,6 @@ class Multivalued extends erd.Multivalued {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -33829,8 +33686,7 @@ class Derived extends erd.Derived {
                 fill: '#000000',
                 text: '',
                 letterSpacing: 0,
-                fontWeight: 'bold' /*,
-                style: { textShadow: '1px 0 1px #333333' }*/
+                fontWeight: 'bold'
             },
             '.inner': {
                 fill: '#ffcb63',
@@ -33845,7 +33701,6 @@ class Derived extends erd.Derived {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
@@ -33880,13 +33735,46 @@ class Relationship extends erd.Relationship {
             }
         }
         }
-        //for (var attrname in args) { args_new[attrname] = args[attrname]; }
         super(args_new)
     }    
 }
 
 
 //Helpers
+//Find Objects
+function get_elements_by_id(id){
+    var elementsList = graph.getElements();
+    for(i in elementsList){
+        if(elementsList[i].id == id){
+            return elementsList[i];
+        }
+    }
+    return null;
+}
+function get_links_by_id(id){
+    var linksList = graph.getLinks();
+    for(i in linksList){
+        if(linksList[i].id == id){
+            return linksList[i];
+        }
+    }
+    return null;
+}
+
+function findAllEntities(){
+    const elementsList = graph.getElements();
+
+    var onlyEntities = [];
+    for(elm in elementsList){
+        var elementType = String(elementsList[elm].attributes.type);
+        if(elementType.includes("Entity")){
+            onlyEntities.push(elementsList[elm]);
+        }
+    }
+    return onlyEntities;
+}
+
+//Create Objects
 var createLink = function(elm1, elm2) {
     if(elm1 != null){
         var myLink = new erd.Line({
@@ -33905,8 +33793,6 @@ var createLink = function(elm1, elm2) {
     }
 };
 
-
-
 function createEntityType(){
     var ent_obj = new Entity();
     ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
@@ -33918,6 +33804,7 @@ function createEntityType(){
 
 function createAttributType(){
     var attr_obj = new Attribute();
+    //Every attribute-type knows its parent entity-type
     attr_obj.attributes.listParent.push(currentElement.id);
 
     attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
@@ -33926,6 +33813,7 @@ function createAttributType(){
     graph.addCell(attr_obj);
 
     createLink(currentElement, attr_obj);
+    //Every entity-tipe knows all of its children attribute-types
     currentElement.attributes.listChildren.push(attr_obj.id);
 
     highlightElement(attr_obj);
@@ -33933,10 +33821,12 @@ function createAttributType(){
 
 function createSubAttributType(){
     var sub_attr_obj = new Attribute();
+    //Every sub attribute-type knows its parent attribute
     sub_attr_obj.attributes.listParent.push(currentElement.id);
     sub_attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
         currentElement.position().y-120+Math.floor(Math.random()*240));
 
+    //Every attribute-type knowsnits children sub attribute-types
     currentElement.attributes.listChildren.push(sub_attr_obj.id);
     graph.addCell(sub_attr_obj);
     createLink(currentElement, sub_attr_obj);
@@ -33956,7 +33846,7 @@ function writeTextInElement(){
     var elementType = String(currentElement.attributes.type);
     if(elementType.includes("Relationship")){
         var msg = document.getElementById("rel_input").value;
-        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
+        currentElement.attr("text/text", msg); 
     }else if(elementType.includes("Entity")){
         var msg = document.getElementById("ent_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
@@ -33966,20 +33856,8 @@ function writeTextInElement(){
     } 
 }
 
-function findAllEntities(){
-    const elementsList = graph.getElements();
-
-    var onlyEntities = [];
-    for(elm in elementsList){
-        var elementType = String(elementsList[elm].attributes.type);
-        if(elementType.includes("Entity")){
-            onlyEntities.push(elementsList[elm]);
-        }
-    }
-    return onlyEntities;
-}
-
-var storedEntities = [];
+//Global dictionary of current entity-type names as key and the object as value
+var storedEntities = {};
 
 function addOptionsToSelect(){
     storedEntities = [];
@@ -33987,11 +33865,12 @@ function addOptionsToSelect(){
     
     var optionsContainer1 = document.getElementById("select1");
     var optionsContainer2 = document.getElementById("select3");
-
+    //Delete all previous stored options
     while(optionsContainer1.length > 1){
         optionsContainer1.remove(1);
         optionsContainer2.remove(1);
     }
+    //Add all entity-type names to select
     for(ent in allEntities){
         var option1 = document.createElement("option");
         option1.value = allEntities[ent].attr("text/text");
@@ -34140,33 +34019,6 @@ function updateLabelsOfConnection(){
     } 
 }
 
-//Frage: Wieso klappt bei einem .value und beim anderen nicht? Beim anderen klappt .text
-function initializeSelectValues(){
-
-    if(get_elements_by_id(currentElement.attributes.firstConnectionObject) != null){
-        var firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
-        document.getElementById("select1").value = firstConnectionObjectName;
-    }
-    if(get_links_by_id(currentElement.attributes.firstConnectionLink) != null){
-        var firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
-        firstLinkLabelName = firstLinkLabelName.trim();
-        //console.log(firstLinkLabelName);
-        //document.getElementById("select2").value = firstLinkLabelName;
-        $("#select2").val(firstLinkLabelName);
-    }
-    if(get_elements_by_id(currentElement.attributes.secondConnectionObject) != null){
-        var secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
-        document.getElementById("select3").value = secondConnectionObjectName;
-    }
-    if(get_links_by_id(currentElement.attributes.secondConnectionLink) != null){
-        var secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
-        secondLinkLabelName = secondLinkLabelName.trim();
-        //console.log(secondLinkLabelName);
-        //document.getElementById("select4").value = secondLinkLabelName;
-        $("#select4").val(secondLinkLabelName);
-    }
-}
-
 function updateValueLableDropdownListToValue_M(){
     var dropdownList = document.getElementById("select4");
     var option = document.createElement("option");
@@ -34186,6 +34038,30 @@ function updateValueLableDropdownListToValue_N(){
     dropdownList.remove(1);
     dropdownList.appendChild(option);
 }
+
+//This if for creating relationship-types with select buttons
+function initializeSelectValues(){
+
+    if(get_elements_by_id(currentElement.attributes.firstConnectionObject) != null){
+        var firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
+        document.getElementById("select1").value = firstConnectionObjectName;
+    }
+    if(get_links_by_id(currentElement.attributes.firstConnectionLink) != null){
+        var firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
+        firstLinkLabelName = firstLinkLabelName.trim();
+        $("#select2").val(firstLinkLabelName);
+    }
+    if(get_elements_by_id(currentElement.attributes.secondConnectionObject) != null){
+        var secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
+        document.getElementById("select3").value = secondConnectionObjectName;
+    }
+    if(get_links_by_id(currentElement.attributes.secondConnectionLink) != null){
+        var secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
+        secondLinkLabelName = secondLinkLabelName.trim();
+        $("#select4").val(secondLinkLabelName);
+    }
+}
+
 function deleteElement(elm){
     console.log(elm);
     var type = String(elm.type);
@@ -34208,54 +34084,45 @@ function deleteElement(elm){
         highlighter.remove();
     }
 }
-module.exports = {
-    erd:erd,
-    graph:graph,
-    paper:paper,
-    highlighter: highlighter,
-    Entity:Entity,
-    WeakEntity:WeakEntity,
-    Attribute:Attribute,
-    Relationship:Relationship,
-    ISA:ISA,
-    highlightElement:highlightElement,
-    createLink:createLink,
-    deleteElement:deleteElement,
-    updateIsaPosition:updateIsaPosition,
-    findAllEntities: findAllEntities
-}
+
 function deleteAttribute(elm){
-    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> don't deletes every node
+    //Get the duplicate of the list, else you change dinamically the list you iterate through --> don't deletes every node
     var listAllChildren = elm.attributes.listChildren.slice();
 
     var parent = get_elements_by_id(elm.attributes.listParent[0]);
     var parentChildList = parent.attributes.listChildren;
 
+    //Find index of attribute in the entity-types child list
     var index = findIndexInList(elm, parentChildList);
+    //Delete childnode from list of the parent
+    parentChildList.splice(index,1);
     
+    //Delete children of attribute and their children
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
     }
-    //Delete childnode from list of the parent
-    parentChildList.splice(index,1);
+    
     
 }
 
 function deleteEntity(elm){
     var isaParentEntity = elm.attributes.isParentEntity;
-    //This is a Parent-Entity, have to remove all connections to its children and the information of ConnectionToParent in chihldnode
+    //This is a Parent-Entity (other entity-types inherit), and doesn't inherit from other entity-type. Have to remove all connections to its children and the information of ConnectionToParent in chihldnode (entity-type)
     if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length == 0){
         removeChildrenInheritance(elm);
+    //Is parent entity-type and inhertits from other entity-type
     }else if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length > 0){
         removeChildrenInheritance(elm);
         removeParentInheritance(elm);
     }
     else{
+        //Only inherits form other entity-type --> has no entity-type children
         if(elm.attributes.inhertitanceConnectionToParent.length > 0){
             removeParentInheritance(elm);
         }
     }
-    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> don't deletes every node
+    //Delete all of the entity-types children(attributes)
+    //Get the duplicate of the list, else you change dinamically the list you iterat threw --> doesn't delete every node
     var listAllChildren = elm.attributes.listChildren.slice();  
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
@@ -34266,6 +34133,7 @@ function removeChildrenInheritance(elm){
     var childList = elm.attributes.inhertitanceConnectionsToChildren;
     for(childConnection in childList){
         var child = get_elements_by_id(childList[childConnection][0]);
+        //Delete informatin about its parent entity-type
         child.attributes.inhertitanceConnectionToParent = [];
         var isa = get_elements_by_id(childList[childConnection][1]);
         var isaLink = get_links_by_id(childList[childConnection][2]);
@@ -34279,24 +34147,12 @@ function removeParentInheritance(elm){
     var isaLink = get_links_by_id(elm.attributes.inhertitanceConnectionToParent[2]);
     var childListOfParent = parent.attributes.inhertitanceConnectionsToChildren;
 
-    removeConnectionFromChildlist(elm, childListOfParent);
+    //Delete information about child entity-type in parent
+    childListOfParent = removeConnectionFromChildlist(elm, childListOfParent);
     if(childListOfParent.length == 0){
         parent.attributes.isParentEntity = false;
     }
     graph.removeCells(isa,isaLink);
-}
-
-function deleteRelationship(elm){
-    var firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    var secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
-
-    graph.removeCells(firstLink);
-    graph.removeCells(secondLink);
-
-    var listAllChildren = elm.attributes.listChildren.slice();  
-    for (child in listAllChildren){
-        deleteElement(get_elements_by_id(listAllChildren[child]));
-    }
 }
 
 function removeConnectionFromChildlist(elm, list){
@@ -34325,6 +34181,21 @@ function findIndexInList(elm, list){
         }
     }
 }
+
+function deleteRelationship(elm){
+    var firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    var secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+
+    graph.removeCells(firstLink);
+    graph.removeCells(secondLink);
+
+    var listAllChildren = elm.attributes.listChildren.slice();  
+    for (child in listAllChildren){
+        deleteElement(get_elements_by_id(listAllChildren[child]));
+    }
+}
+
+
 function actionOnAttributeForMultivalued(){
     var checkbox1 = document.getElementById("checkbox1");
     var checkbox2 = document.getElementById("checkbox2");
@@ -34355,11 +34226,7 @@ function actionOnAttributeForPrimaryKey(){
     }
 }
 
-
-//Frage: Nur Eigenschaften des Objektes werden geändert, aber nicht der Typ. Wie macht man es richtig?
 function makeAttributeMultivalued(){
-    //var text = currentElement.attributes.attrs.text.text;
-    //var bla = new Multivalued(currentElement.attributes);
     currentElement.attr(".inner/display", "block");
     currentElement.attr(".inner/fill", "#ffcb63");
     currentElement.attr(".inner/stroke", "#797d9a");
@@ -34406,7 +34273,6 @@ function createISA(){
     var connectionObject = storedEntitiesISA[selectValue];
     if(currentElement.attributes.inhertitanceConnectionToParent.length == 0){
         makeNewIsaConnection(currentElement, connectionObject);
-        //console.log(connectionObject);
     // Entity is alreday inherited, but user select to undo the inheritance
     }else if(selectValue == "" && currentElement.attributes.inhertitanceConnectionToParent.length > 0){
         changeIsaConnections(currentElement);
@@ -34464,7 +34330,22 @@ function updateIsaSelect(){
     
 }
 
-
+module.exports = {
+    erd:erd,
+    graph:graph,
+    paper:paper,
+    highlighter: highlighter,
+    Entity:Entity,
+    WeakEntity:WeakEntity,
+    Attribute:Attribute,
+    Relationship:Relationship,
+    ISA:ISA,
+    highlightElement:highlightElement,
+    createLink:createLink,
+    deleteElement:deleteElement,
+    updateIsaPosition:updateIsaPosition,
+    findAllEntities: findAllEntities
+}
 },{"../node_modules/jointjs":4}],13:[function(require,module,exports){
 //var BayesClassifier = require('bayes-classifier');
 var rita = require('../node_modules/rita');
@@ -34545,7 +34426,6 @@ function find_do_name(input){
     }else{
         classes.swal_to_user("What is the name of the attribute you want to make primary key?", "Please repeat your whole sentence!");
     }
-    //console.log("Cant find name for undoing primary key or multivalued");
     return null;
 }
 function find_undo_name(input){
@@ -34559,7 +34439,6 @@ function find_undo_name(input){
             }
         }
     }
-    //console.log("Cant find name for undoing primary key or multivalued");
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
         classes.swal_to_user("What is the name of the multi-valued attribute you want to undo?", "Please repeat your whole sentence!");
     }else{
@@ -34584,7 +34463,6 @@ function find_rename_obj(input){
             
         }
     }
-    //console.log("Not found name or rename");
     classes.swal_to_user("What object do you want to rename?","Please repeat your whole sentence!")
     return null;
 }
@@ -34657,12 +34535,10 @@ function find_relationship_name(input){
             if(check_if_noun(relationship_name) == false){
                 return relationship_name;
             }
-            //console.log("Relationship can't be a noun!");
             classes.swal_to_user("Relationship name can't be a noun!", "Pleas repeat your whole sentence!")
             return null;
         }
     }
-    //console.log("What is the name of the relationship?");
     classes.swal_to_user("What is the name of the relationship?", "Please include the name of the relationship in you whole sentence!");
     return null;
 }
@@ -34676,13 +34552,11 @@ function find_attribute_name(input){
                 attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return attribute_name;
             }else{
-                //console.log("What is the name of the attribute?");
                 classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
                 return null;
             }
         }
     }
-    //console.log("What is the name of the attribute?");
     classes.swal_to_user("What is the name of the Attribute?", "Please repeat in a whole sentence?");
     return null;
 }
@@ -34696,13 +34570,11 @@ function find_sub_attribute_name(input){
                 var sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return sub_attribute_name;
             }else{
-                //return console.log("What is the name of the sub attribute?");
                 classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
             }
         }
     }
     classes.swal_to_user("Couldn't find name for sub attribute!", "Please repeat in a whole sentence?");
-    //return console.log("What is the name of the sub attribute?");
 }
 
 function find_entity_names(input, bool_for_rel){
@@ -34718,7 +34590,6 @@ function find_entity_names(input, bool_for_rel){
                     list_entity_names.push(entity_name1);
                     list_entity_names.push(entity_name2);
                 }else{
-                    //return console.log("What is the name of the entity types for the relationship?");
                     classes.swal_to_user("What is the name of the entity types for the relationship?",null)
                 }
             }else{
@@ -34726,7 +34597,6 @@ function find_entity_names(input, bool_for_rel){
                     entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                     list_entity_names.push(entity_name);
                 }else{
-                    //console.log("What is the name of the entity?");
                     classes.swal_to_user("Name of entity must be a noun?",null);
                     list_entity_names.push(null);
                     return list_entity_names;
@@ -34756,9 +34626,7 @@ function find_entities_for_isa(input){
                 entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
                 list_entity_names.push(entity_name1);
                 list_entity_names.push(entity_name2);
-                //console.log("hallo");
             }else{
-                //console.log("What is the name of the entity types for isa type?");
                 classes.swal_to_user("What are the names of the entity types for isa type?",null);
                 list_entity_names.push(null);
                 return list_entity_names;
@@ -34772,7 +34640,6 @@ function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
     if(input.indexOf('create') != -1 || input.indexOf('insert') != -1 || input.indexOf('draw') != -1 || input.indexOf('paint') != -1){
-        //console.log("Create");
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
@@ -34907,7 +34774,6 @@ module.exports = {
 
 
 },{"../node_modules/rita":8,"./classes":11}],14:[function(require,module,exports){
-const { execute_speech } = require('./classifier');
 var classifier = require('./classifier');
 
 const textbox = document.getElementById("textbox");
@@ -34922,8 +34788,7 @@ recognition.interimResults = true;
 recognition.continuous = true;
 recognition.lang = 'en-US';
 
-//micBtn.addEventListener("mousedown", start_speech_recognition);
-//micBtn.addEventListener("mouseup", stop_speech_recognition);
+
 micBtn.addEventListener("click", start_or_stop_recording);
 var started = false;
 
@@ -34968,10 +34833,6 @@ function endSpeechRecognition(){
 }
 
 recognition.addEventListener("result", resultOfSpeechRecognition);
-/*function resultOfSpeechRecognition(event){
-    const transcript = event.results[0][0].transcript;
-    textbox.value = transcript;
-}*/
 
 var fianl_transcript = '';
 

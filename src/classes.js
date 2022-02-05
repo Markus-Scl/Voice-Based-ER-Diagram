@@ -10,10 +10,10 @@ var paper = class_buttons.paper;
 var highlighter = class_buttons.highlighter;
 
 //Helpers
-//Helper functions to find objects by name
 function get_levenshtein(word_input, name_object){
     return [levenshtein(word_input, name_object)/word_input.length, name_object];
 }
+//Helper functions to find objects by name
 function find_entity_object_by_name(name_entity){
     if(name_entity != null){
         const elementsList = graph.getElements();
@@ -22,12 +22,14 @@ function find_entity_object_by_name(name_entity){
             var elementType = String(elementsList[elm].attributes.type);
             if(elementType.includes("Entity")){
                 element_name = elementsList[elm].attr("text/text");
+                //Calculate difference between words
                 list_lev.push(get_levenshtein(name_entity, element_name));
                 if(element_name == name_entity){
                     return elementsList[elm];
                 }
             }
         }
+        //Didn't understand the right word from user input, takes the closest word instead (if there is one)
         list_lev.sort();
         if(list_lev[0][0] < 1){
             var closest_word = list_lev[0][1];
@@ -60,7 +62,7 @@ function find_attribute_object_by_name(name_attribute){
         list_lev.sort();
         if(list_lev[0][0] < 1){
             var closest_word = list_lev[0][1];
-            var attr_obj = find_entity_object_by_name(closest_word);
+            var attr_obj = find_attribute_object_by_name(closest_word);
             return [attr_obj];
         }else{
             return null;
@@ -87,14 +89,14 @@ function find_attribute_of_object(ent_obj, name_attribute){
     }
 }
 
-function find_relationship(name_second_entity, ent_obj){
+/*function find_relationship(name_second_entity, ent_obj){
     list_rel = ent_obj.attributes.relationship_object;
     for(rel in rel_obj){
         if(rel_obj[rel][2].attr("text/text") == name_second_entity){
             return rel_obj[rel][1];
         }
     }
-}
+}*/
 
 function find_object_by_name(name_object){
     var elementsList = graph.getElements();
@@ -107,7 +109,6 @@ function find_object_by_name(name_object){
             match_elements.push(elementsList[elm]);
         }
     }
-
     /*if(match_elements.length == 0){
         list_lev.sort();
         if(list_lev[0][0] < 1){
@@ -144,7 +145,6 @@ function get_links_by_id(id){
 }
 
 //Functions for creating object
-
 function create_isa_type(name_child, name_parent){
     var child_ent = find_entity_object_by_name(name_child);
     var parent_ent = find_entity_object_by_name(name_parent);
@@ -166,8 +166,6 @@ function create_entity_type(name_entity){
 
         graph.addCell(ent_obj);
         class_buttons.highlightElement(ent_obj);
-    }else{
-        //console.log('What is the name of the entity?');
     }
 }
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
@@ -195,8 +193,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
             class_buttons.createLink(ent_obj, attr_obj);
             ent_obj.attributes.listChildren.push(attr_obj.id);
             class_buttons.highlightElement(attr_obj);
-        }else{
-            //console.log("else");
+        }else if(currentElement != null){
             attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
                 currentElement.position().y-120+Math.floor(Math.random()*240));
                 
@@ -231,8 +228,6 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
     //There are more attributes with that name
     }else{
         if(name_entity == null){
-            //console.log("There are multiple attributes with the name \"" + name_attribute + "\"");
-            //console.log("Please mention the name of the entity aswell!");
             swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
         }else{
             var ent_obj = find_entity_object_by_name(name_entity);
@@ -266,11 +261,11 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
 function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
     
     var ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    //console.log(ent_obj_1);
+    
     var ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    //console.log(ent_obj_2);
+    
 
-    //Every entity knows their whole relationsships
+    //Every entity-type knows their whole relationsships
     if(ent_obj_1 != null && ent_obj_2 != null){
         var rel_obj = new class_buttons.Relationship();
         rel_obj.attr("text/text", name_relationship);
@@ -322,21 +317,6 @@ function swal_to_user(input1, input2){
     
 }
 
-module.exports = {
-    create_entity_type: create_entity_type,
-    create_attribute_type: create_attribute_type,
-    create_relationship_type: create_relationship_type,
-    add_label_to_connection: add_label_to_connection,
-    create_sub_attribute_type: create_sub_attribute_type,
-    create_isa_type: create_isa_type,
-    delete_object: delete_object,
-    rename_object: rename_object,
-    make_primary_key: make_primary_key,
-    undo_primary_key: undo_primary_key,
-    make_multi_valued: make_multi_valued,
-    undo_multi_valued: undo_multi_valued,
-    swal_to_user: swal_to_user
-}
 //Helpers to change appearance of objects
 function make_primary_key(name_attr){
     var attr_objs = find_attribute_object_by_name(name_attr);
@@ -353,8 +333,6 @@ function make_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to make as primary key and repeat your sentence');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
             }
         }
@@ -376,8 +354,6 @@ function undo_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to undo primary key');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
             }
         }
@@ -400,8 +376,6 @@ function make_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to make multi valued and repeat your sentence');
                 swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
             }
         }
@@ -425,8 +399,6 @@ function undo_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple attributes with the name \"' + name_attr +"\"");
-                //console.log('Please click on the attribute you want to undo primary key');
                 swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
             }
         }
@@ -451,8 +423,6 @@ function rename_object(old_name, new_name){
                 }
             }
             if(!elm_found){
-                //console.log('There are multiple objects with the name \"' + old_name +"\"");
-                //console.log('Please click on the object you want to rename and repeat your sentence');
                 swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
             }
         }
@@ -473,16 +443,12 @@ function delete_object(name_object){
             }
         }
         if(found_elm == false){
-            //console.log("There are multiple objects with the name \"" + name_object + "\".");
-            //console.log("Please click on the object you want to delete and repeat the sentence");
             swal("There are multiple objects with the name \"" + name_object + "\".", "Please click on the object you want to delete and repeat your sentence!");
         }
     }  
 }
 
 function makeAttributeMultivalued(attr_obj){
-    //var text = currentElement.attributes.attrs.text.text;
-    //var bla = new Multivalued(currentElement.attributes);
     attr_obj.attr(".inner/display", "block");
     attr_obj.attr(".inner/fill", "#ffcb63");
     attr_obj.attr(".inner/stroke", "#797d9a");
@@ -515,15 +481,12 @@ function add_label_to_connection(name_entity_1, name_entity_2, val_number){
 function check_and_update_label(link, value_to_insert){
    var value_label = link.attributes.labels[0].attrs.text.text;
    if(value_to_insert == '1' && value_label == "M\n"){
-       //console.log("1 if");
         link.set(create_label("N"));
         return value_to_insert;
    }else if(value_to_insert == 'N' && value_label == "N\n"){
-      //console.log("2 if");
         value_to_insert = "M";
         return value_to_insert;
     }else{
-       //console.log("else");
         return value_to_insert;
     }
 }
@@ -572,4 +535,20 @@ function find_index_of_child_entity(elm, listOfLists){
             index +=1;
         }
     }
+}
+
+module.exports = {
+    create_entity_type: create_entity_type,
+    create_attribute_type: create_attribute_type,
+    create_relationship_type: create_relationship_type,
+    add_label_to_connection: add_label_to_connection,
+    create_sub_attribute_type: create_sub_attribute_type,
+    create_isa_type: create_isa_type,
+    delete_object: delete_object,
+    rename_object: rename_object,
+    make_primary_key: make_primary_key,
+    undo_primary_key: undo_primary_key,
+    make_multi_valued: make_multi_valued,
+    undo_multi_valued: undo_multi_valued,
+    swal_to_user: swal_to_user
 }

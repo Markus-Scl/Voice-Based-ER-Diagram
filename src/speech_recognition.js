@@ -1,4 +1,3 @@
-const { execute_speech } = require('./classifier');
 var classifier = require('./classifier');
 
 const textbox = document.getElementById("textbox");
@@ -13,8 +12,7 @@ recognition.interimResults = true;
 recognition.continuous = true;
 recognition.lang = 'en-US';
 
-//micBtn.addEventListener("mousedown", start_speech_recognition);
-//micBtn.addEventListener("mouseup", stop_speech_recognition);
+
 micBtn.addEventListener("click", start_or_stop_recording);
 var started = false;
 
@@ -59,10 +57,6 @@ function endSpeechRecognition(){
 }
 
 recognition.addEventListener("result", resultOfSpeechRecognition);
-/*function resultOfSpeechRecognition(event){
-    const transcript = event.results[0][0].transcript;
-    textbox.value = transcript;
-}*/
 
 var fianl_transcript = '';
 

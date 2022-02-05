@@ -77,7 +77,6 @@ function find_do_name(input){
     }else{
         classes.swal_to_user("What is the name of the attribute you want to make primary key?", "Please repeat your whole sentence!");
     }
-    //console.log("Cant find name for undoing primary key or multivalued");
     return null;
 }
 function find_undo_name(input){
@@ -91,7 +90,6 @@ function find_undo_name(input){
             }
         }
     }
-    //console.log("Cant find name for undoing primary key or multivalued");
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
         classes.swal_to_user("What is the name of the multi-valued attribute you want to undo?", "Please repeat your whole sentence!");
     }else{
@@ -116,7 +114,6 @@ function find_rename_obj(input){
             
         }
     }
-    //console.log("Not found name or rename");
     classes.swal_to_user("What object do you want to rename?","Please repeat your whole sentence!")
     return null;
 }
@@ -189,12 +186,10 @@ function find_relationship_name(input){
             if(check_if_noun(relationship_name) == false){
                 return relationship_name;
             }
-            //console.log("Relationship can't be a noun!");
             classes.swal_to_user("Relationship name can't be a noun!", "Pleas repeat your whole sentence!")
             return null;
         }
     }
-    //console.log("What is the name of the relationship?");
     classes.swal_to_user("What is the name of the relationship?", "Please include the name of the relationship in you whole sentence!");
     return null;
 }
@@ -208,13 +203,11 @@ function find_attribute_name(input){
                 attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return attribute_name;
             }else{
-                //console.log("What is the name of the attribute?");
                 classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
                 return null;
             }
         }
     }
-    //console.log("What is the name of the attribute?");
     classes.swal_to_user("What is the name of the Attribute?", "Please repeat in a whole sentence?");
     return null;
 }
@@ -228,13 +221,11 @@ function find_sub_attribute_name(input){
                 var sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return sub_attribute_name;
             }else{
-                //return console.log("What is the name of the sub attribute?");
                 classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
             }
         }
     }
     classes.swal_to_user("Couldn't find name for sub attribute!", "Please repeat in a whole sentence?");
-    //return console.log("What is the name of the sub attribute?");
 }
 
 function find_entity_names(input, bool_for_rel){
@@ -250,7 +241,6 @@ function find_entity_names(input, bool_for_rel){
                     list_entity_names.push(entity_name1);
                     list_entity_names.push(entity_name2);
                 }else{
-                    //return console.log("What is the name of the entity types for the relationship?");
                     classes.swal_to_user("What is the name of the entity types for the relationship?",null)
                 }
             }else{
@@ -258,7 +248,6 @@ function find_entity_names(input, bool_for_rel){
                     entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                     list_entity_names.push(entity_name);
                 }else{
-                    //console.log("What is the name of the entity?");
                     classes.swal_to_user("Name of entity must be a noun?",null);
                     list_entity_names.push(null);
                     return list_entity_names;
@@ -288,9 +277,7 @@ function find_entities_for_isa(input){
                 entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
                 list_entity_names.push(entity_name1);
                 list_entity_names.push(entity_name2);
-                //console.log("hallo");
             }else{
-                //console.log("What is the name of the entity types for isa type?");
                 classes.swal_to_user("What are the names of the entity types for isa type?",null);
                 list_entity_names.push(null);
                 return list_entity_names;
@@ -304,7 +291,6 @@ function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
     if(input.indexOf('create') != -1 || input.indexOf('insert') != -1 || input.indexOf('draw') != -1 || input.indexOf('paint') != -1){
-        //console.log("Create");
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
