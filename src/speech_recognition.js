@@ -1,4 +1,5 @@
 var classifier = require('./classifier');
+var sendAjax = require('../node_modules/send-ajax');
 
 const textbox = document.getElementById("textbox");
 const micBtn = document.getElementById("voiceButton");  
@@ -15,6 +16,17 @@ recognition.lang = 'en-US';
 
 micBtn.addEventListener("click", start_or_stop_recording);
 var started = false;
+const postData = (ajaxUrl, data) => {
+    return sendAjax({
+      url: ajaxUrl,
+      method: 'POST',
+      data,
+      responseType: 'json',
+      after: () => {
+        // always executed
+      }
+    });
+  };
 
 function start_or_stop_recording(){
     if(started == false){
@@ -27,8 +39,8 @@ function start_or_stop_recording(){
     }else{
         started = false;
         document.getElementById('voiceButton').classList.remove('glow-on-hover');
+        postData("https://maker.ifttt.com/trigger/voice-er-log/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",{value1 : "Ended recognition!",value2 : "bla", value3 : "blabla"});
         stop_speech_recognition();
-        
     }
 }
 
