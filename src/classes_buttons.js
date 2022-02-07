@@ -1,4 +1,9 @@
 var joint = require('../node_modules/jointjs');
+var uniqid = require('../node_modules/uniqid');
+
+let user_id = uniqid();
+const do_log = true;
+
 
 const ent_button = document.getElementById('ent_button');
 const rel_button = document.getElementById('rel_button');
@@ -213,7 +218,7 @@ erd.ISA.prototype.getConnectionPoint = function(referencePoint) {
 
 function highlightElement(elm){
     currentElement = elm;
-
+    
     var padding = 5;
     var bbox = elm.getBBox({ useModelGeometry: true }).inflate(padding);
 
@@ -601,6 +606,14 @@ var createLink = function(elm1, elm2) {
         return myLink.addTo(graph);
     }
 };
+function execute_ajax(user_id, action_on, action){
+    $.ajax({
+        url: "https://maker.ifttt.com/trigger/log-trigger/json/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",
+        type: "POST",
+        dataType: 'application/json',
+        data: {user_id: user_id, action_on : action_on ,action : action}
+    });
+}
 
 function createEntityType(){
     var ent_obj = new Entity();
@@ -608,6 +621,9 @@ function createEntityType(){
             Math.floor(Math.random() * (paper.getArea().height-65)));
     graph.addCell(ent_obj);
     highlightElement(ent_obj);
+    if(do_log){
+        execute_ajax(user_id,"On Button Click", "Create Entity-Type");
+    }
 }
 
 
@@ -626,6 +642,9 @@ function createAttributType(){
     currentElement.attributes.listChildren.push(attr_obj.id);
 
     highlightElement(attr_obj);
+    if(do_log){
+        execute_ajax(user_id,"On Button Click", "Create Attribute-Type");
+    }
 }
 
 function createSubAttributType(){
@@ -640,6 +659,9 @@ function createSubAttributType(){
     graph.addCell(sub_attr_obj);
     createLink(currentElement, sub_attr_obj);
     highlightElement(sub_attr_obj);
+    if(do_log){
+        execute_ajax(user_id,"On Button Click", "Create Sub-Attribute-Type");
+    }
 }
 
 function createRelationshipType(){
@@ -649,6 +671,9 @@ function createRelationshipType(){
             Math.floor(Math.random() * (paper.getArea().height-65)));
     graph.addCell(rel_obj);
     highlightElement(rel_obj);
+    if(do_log){
+        execute_ajax(user_id,"On Button Click", "Create Relationship-Type");
+    }
 }
 
 function writeTextInElement(){
@@ -658,7 +683,7 @@ function writeTextInElement(){
         currentElement.attr("text/text", msg); 
     }else if(elementType.includes("Entity")){
         var msg = document.getElementById("ent_input").value;
-        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
+        currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1));
     }else if(elementType.includes("Normal")){
         var msg = document.getElementById("attr_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
@@ -721,6 +746,9 @@ function createRelationshipOne(){
     firstLink.set(createLabel("1"));
     currentElement.attributes.firstConnectionLink = firstLink.id;
     currentElement.attributes.firstConnectionObject = connectionObject.id;
+    if(do_log){
+        execute_ajax(user_id,"On Select Value", "Create Relationship-One for " + selectValue);
+    }
 
 }
 function createRelationshipTwo(){
@@ -748,6 +776,9 @@ function createRelationshipTwo(){
     secondLink.set(createLabel("1"));
     currentElement.attributes.secondConnectionObject = connectionObject.id;
     currentElement.attributes.secondConnectionLink = secondLink.id;
+    if(do_log){
+        execute_ajax(user_id,"On Select Value", "Create Relationship-Two for " + selectValue);
+    }
 }
 
 var createLabel = function(txt) {
@@ -767,6 +798,9 @@ function addLabelToConnectionOne(){
     var currentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
     currentLink.set(createLabel(selectValue));
     updateLabelsOfConnection();
+    if(do_log){
+        execute_ajax(user_id,"On Select Value", "Change number for Entity 1 to: " + selectValue);
+    }
 }
 
 function addLabelToConnectionTwo(){
@@ -774,6 +808,9 @@ function addLabelToConnectionTwo(){
     var currentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
     currentLink.set(createLabel(selectValue));
     updateLabelsOfConnection();
+    if(do_log){
+        execute_ajax(user_id,"On Select Value", "Change number for Entity 2 to: " + selectValue);
+    }
 }
 
 function updateLabelsOfConnection(){
@@ -872,7 +909,6 @@ function initializeSelectValues(){
 }
 
 function deleteElement(elm){
-    console.log(elm);
     var type = String(elm.type);
     if(type.includes("click")){
         elm = currentElement;
@@ -881,12 +917,21 @@ function deleteElement(elm){
         var elementType = String(elm.attributes.type);
         //Delete Entity and all it's children attributes
         if(elementType.includes("Entity")){
+            if(do_log){
+                execute_ajax(user_id,"On Button Click", "Delete Entity-Type: " + elm.attr("text/text"));
+            }
             deleteEntity(elm);
         //Delet attributes and their children attributes
         }else if(elementType.includes("Normal")){
+            if(do_log){
+                execute_ajax(user_id,"On Button Click", "Delete Attribute-Type: " + elm.attr("text/text"));
+            }
             deleteAttribute(elm);
         //Delete relationship and their children attributes and their connection links between Entities
         }else if(elementType.includes("Relationship")){
+            if(do_log){
+                execute_ajax(user_id,"On Button Click", "Delete Relationship-Type: " + elm.attr("text/text"));
+            }
             deleteRelationship(elm);
         }
         graph.removeCells(elm);
@@ -1040,18 +1085,30 @@ function makeAttributeMultivalued(){
     currentElement.attr(".inner/fill", "#ffcb63");
     currentElement.attr(".inner/stroke", "#797d9a");
     currentElement.attr(".outer/stroke", "#797d9a");
+    if(do_log){
+        execute_ajax(user_id,"On checkbox multivalued checked", "Make Attribute-Type multi valued: " + currentElement.attr("text/text"));
+    }
 }
 
 function makeMultiSingleValued(){
     currentElement.attr(".inner/display", "none");
     currentElement.attr(".outer/stroke", "#ffcb63");
+    if(do_log){
+        execute_ajax(user_id,"On checkbox multivalued unchecked", "Make Attribute-Type single valued: " + currentElement.attr("text/text"));
+    }
 }
 
 function makePrimaryKey(){
     currentElement.attr("text/text-decoration", "underline");
+    if(do_log){
+        execute_ajax(user_id,"On checkbox primary key checked", "Make Attribute-Type primary key: " + currentElement.attr("text/text"));
+    }
 }
 function undoPrimaryKey(){
     currentElement.attr("text/text-decoration", "none");
+    if(do_log){
+        execute_ajax(user_id,"On checkbox primary key unchecked", "Undo primary key for Attribute-Type: " + currentElement.attr("text/text"));
+    }
 }
 
 var storedEntitiesISA = [];
@@ -1089,6 +1146,9 @@ function createISA(){
     }else if(selectValue != "" && currentElement.attributes.inhertitanceConnectionToParent.length > 0){
         changeIsaConnections(currentElement);
         makeNewIsaConnection(currentElement, connectionObject);
+    }
+    if(do_log){
+        execute_ajax(user_id,"On select isa", "Create isa-type -->child: " + currentElement.attr("text/text") + " parent: " + selectValue);
     }
 }
 

@@ -5,6 +5,7 @@
     "js-levenshtein": "^1.1.6",
     "rita": "^2.7.1",
     "send-ajax": "^1.0.19",
-    "sweetalert": "^2.1.2"
+    "sweetalert": "^2.1.2",
+    "uniqid": "^5.4.0"
   }
 }
