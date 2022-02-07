@@ -16,18 +16,8 @@ recognition.lang = 'en-US';
 
 micBtn.addEventListener("click", start_or_stop_recording);
 var started = false;
-const postData = (ajaxUrl, data) => {
-    return sendAjax({
-      url: ajaxUrl,
-      method: 'POST',
-      data,
-      responseType: 'json',
-      after: () => {
-        // always executed
-      }
-    });
-  };
 
+var tst = 'Create entity!';
 function start_or_stop_recording(){
     if(started == false){
         started = true;
@@ -39,9 +29,19 @@ function start_or_stop_recording(){
     }else{
         started = false;
         document.getElementById('voiceButton').classList.remove('glow-on-hover');
-        postData("https://maker.ifttt.com/trigger/voice-er-log/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",{value1 : "Ended recognition!",value2 : "bla", value3 : "blabla"});
+        execute_ajax("Create-Entity", "Create entity type house");
         stop_speech_recognition();
     }
+}
+
+function execute_ajax(input_1, input_2){
+    $.ajax({
+        url: "https://maker.ifttt.com/trigger/log-trigger/json/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",
+        type: "POST",
+        dataType: 'application/json',
+        
+        data: {action : input_1 ,user_input : input_2}
+      });
 }
 
 function start_speech_recognition(){
