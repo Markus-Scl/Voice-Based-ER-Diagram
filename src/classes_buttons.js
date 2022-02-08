@@ -588,6 +588,16 @@ function findAllEntities(){
     return onlyEntities;
 }
 
+//Helper for writing to google sheets
+function execute_ajax(user_id, action_on, action){
+    $.ajax({
+        url: "https://maker.ifttt.com/trigger/log-trigger/json/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",
+        type: "POST",
+        dataType: 'application/json',
+        data: {user_id: user_id, action_on : action_on ,action : action}
+    });
+}
+
 //Create Objects
 var createLink = function(elm1, elm2) {
     if(elm1 != null){
@@ -606,14 +616,6 @@ var createLink = function(elm1, elm2) {
         return myLink.addTo(graph);
     }
 };
-function execute_ajax(user_id, action_on, action){
-    $.ajax({
-        url: "https://maker.ifttt.com/trigger/log-trigger/json/with/key/oxQQU39-NxWKLgAMZSuRmKrGc9JE1VOrBBrVU0KHEN0",
-        type: "POST",
-        dataType: 'application/json',
-        data: {user_id: user_id, action_on : action_on ,action : action}
-    });
-}
 
 function createEntityType(){
     var ent_obj = new Entity();
@@ -1204,6 +1206,8 @@ module.exports = {
     graph:graph,
     paper:paper,
     highlighter: highlighter,
+    user_id: user_id,
+    do_log: do_log,
     Entity:Entity,
     WeakEntity:WeakEntity,
     Attribute:Attribute,

@@ -144,7 +144,7 @@ function get_links_by_id(id){
     return null;
 }
 
-//Functions for creating object
+//Functions for creating objects
 function create_isa_type(name_child, name_parent){
     var child_ent = find_entity_object_by_name(name_child);
     var parent_ent = find_entity_object_by_name(name_parent);
