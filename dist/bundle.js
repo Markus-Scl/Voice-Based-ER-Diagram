@@ -32748,7 +32748,13 @@ var highlighter = class_buttons.highlighter;
 
 //Helpers
 function get_levenshtein(word_input, name_object){
-    return [levenshtein(word_input, name_object)/word_input.length, name_object];
+    return [levenshtein(word_input, name_object)/get_length_of_shorter_word(word_input,name_object), name_object];
+}
+function get_length_of_shorter_word(word1, word2){
+    if(word1.length <= word2.length){
+        return word1.length;
+    }
+    return word2.length;
 }
 //Helper functions to find objects by name
 function find_entity_object_by_name(name_entity){
@@ -32838,27 +32844,27 @@ function find_attribute_of_object(ent_obj, name_attribute){
 function find_object_by_name(name_object){
     var elementsList = graph.getElements();
     var match_elements = [];
-    //var list_lev = [];
+    var list_lev = [];
     for(elm in elementsList){
         var element_name = elementsList[elm].attr("text/text");
-        //list_lev.push(get_levenshtein(name_object, element_name));
+        list_lev.push(get_levenshtein(name_object, element_name));
         if(element_name == name_object){
             match_elements.push(elementsList[elm]);
         }
     }
-    /*if(match_elements.length == 0){
+    if(match_elements.length == 0){
         list_lev.sort();
-        if(list_lev[0][0] < 1){
+        if(list_lev[0][0] < 0.7){
             var closest_word = list_lev[0][1];
-            var obj = find_attribute_of_object(closest_word);
-            return obj;
+            var obj_list = find_object_by_name(closest_word);
+            return obj_list;
         }else{
             return null;
         }
-    }*/
-    if(match_elements.length == 0){
-        return null;
     }
+    /*if(match_elements.length == 0){
+        return null;
+    }*/
     return match_elements;
 }
 function get_elements_by_id(id){
@@ -33169,7 +33175,9 @@ function rename_object(old_name, new_name){
 function delete_object(name_object){
     var del_obj_list = find_object_by_name(name_object);
     var found_elm = false;
-    if(del_obj_list.length == 1){
+    if(del_obj_list == null){
+        swal("There is no object called \"" + name_object + "\".", "Can't delete object!");
+    }else if(del_obj_list.length == 1){
         class_buttons.deleteElement(del_obj_list[0]);
     }else{
         for(elm in del_obj_list){
@@ -33294,7 +33302,7 @@ var joint = require('../node_modules/jointjs');
 var uniqid = require('../node_modules/uniqid');
 
 let user_id = uniqid();
-const do_log = true;
+const do_log = false;
 
 
 const ent_button = document.getElementById('ent_button');
@@ -34660,8 +34668,6 @@ function find_delete_object(input){
             }else{
                 name_obj = match[1];
             }
-            
-            console.log(name_obj);
             return name_obj;
         }
     }
@@ -35114,12 +35120,12 @@ function start_or_stop_recording(){
 
 
 function start_speech_recognition(){
-    console.log("started speech recognition");    
+    //console.log("started speech recognition");    
     recognition.start();
     }
     
 function stop_speech_recognition(){
-    console.log("stopped speech recognition"); 
+    //console.log("stopped speech recognition"); 
     recognition.stop();
 }
 
@@ -35127,13 +35133,13 @@ function stop_speech_recognition(){
 
 recognition.addEventListener("start", startSpeechRecognition);
 function startSpeechRecognition(){
-    console.log("Speechrecognition Active");
+    //console.log("Speechrecognition Active");
 }
 
 recognition.addEventListener("end", endSpeechRecognition);
 function endSpeechRecognition(){
-    console.log("Speech Recognition disconnected");
-    console.log(fianl_transcript);
+    //console.log("Speech Recognition disconnected");
+    //console.log(fianl_transcript);
     classifier.execute_speech(fianl_transcript);
 }
 

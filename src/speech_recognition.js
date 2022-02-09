@@ -34,12 +34,12 @@ function start_or_stop_recording(){
 
 
 function start_speech_recognition(){
-    console.log("started speech recognition");    
+    //console.log("started speech recognition");    
     recognition.start();
     }
     
 function stop_speech_recognition(){
-    console.log("stopped speech recognition"); 
+    //console.log("stopped speech recognition"); 
     recognition.stop();
 }
 
@@ -47,13 +47,13 @@ function stop_speech_recognition(){
 
 recognition.addEventListener("start", startSpeechRecognition);
 function startSpeechRecognition(){
-    console.log("Speechrecognition Active");
+    //console.log("Speechrecognition Active");
 }
 
 recognition.addEventListener("end", endSpeechRecognition);
 function endSpeechRecognition(){
-    console.log("Speech Recognition disconnected");
-    console.log(fianl_transcript);
+    //console.log("Speech Recognition disconnected");
+    //console.log(fianl_transcript);
     classifier.execute_speech(fianl_transcript);
 }
 

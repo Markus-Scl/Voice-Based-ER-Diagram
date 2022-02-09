@@ -145,8 +145,6 @@ function find_delete_object(input){
             }else{
                 name_obj = match[1];
             }
-            
-            console.log(name_obj);
             return name_obj;
         }
     }
