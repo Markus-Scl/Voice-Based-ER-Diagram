@@ -2,7 +2,7 @@ var joint = require('../node_modules/jointjs');
 var uniqid = require('../node_modules/uniqid');
 
 let user_id = uniqid();
-const do_log = true;
+const do_log = false;
 
 
 const ent_button = document.getElementById('ent_button');
@@ -139,6 +139,7 @@ var paper = new joint.dia.Paper({
     background: {
         color: 'white'
     },
+
     defaultConnectionPoint: function(line, view) {
         var element = view.model;
         return element.getConnectionPoint(line.start) || element.getBBox().center();

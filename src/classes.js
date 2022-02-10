@@ -177,7 +177,8 @@ function create_entity_type(name_entity){
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
     var list_entities = class_buttons.findAllEntities();
     if(list_entities.length == 0){
-        swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
+        //swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
+        toastr.error("","You need to create an entity-type first before adding an attribute-type!");
     }else{
         var attr_obj = new class_buttons.Attribute();
         attr_obj.attr("text/text", name_attribute); 
@@ -234,7 +235,8 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
     //There are more attributes with that name
     }else{
         if(name_entity == null){
-            swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
+            //swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
+            toastr.error( "Please mention the name of the entity aswell!","There are multiple attributes with the name \"" + name_attribute + "\"");
         }else{
             var ent_obj = find_entity_object_by_name(name_entity);
             if(ent_obj != null){
@@ -254,11 +256,13 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
                     class_buttons.highlightElement(sub_attr_obj);
                 }else{
                     //console.log("Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
-                    swal("Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
+                    //swal("Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
+                    toastr.error("","Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
                 }
             }else{
                 //console.log("Can not find entity named \"" + name_entity + "\"");
-                swal("Can not find entity named \"" + name_entity + "\"");
+                //swal("Can not find entity named \"" + name_entity + "\"");
+                toastr.error("","Can not find entity named \"" + name_entity + "\"");
             }
         }
     }
@@ -314,14 +318,14 @@ var create_label = function(txt) {
     };
 };
 
-function swal_to_user(input1, input2){
+/*function swal_to_user(input1, input2){
     if(input2 == null){
         swal(input1);
     }else{
         swal(input1, input2);
     }
     
-}
+}*/
 
 //Helpers to change appearance of objects
 function make_primary_key(name_attr){
@@ -339,7 +343,8 @@ function make_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
+                //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
+                toastr.error('Please click on the attribute you want to make as primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
             }
         }
 
@@ -360,7 +365,8 @@ function undo_primary_key(name_attr){
                 }
             }
             if(!elm_found){
-                swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
+                //swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
+                toastr('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
             }
         }
 
@@ -382,7 +388,8 @@ function make_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
+                //swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
+                toastr.error('Please click on the attribute you want to make multi valued and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\"");
             }
         }
 
@@ -405,7 +412,8 @@ function undo_multi_valued(name_attr){
                 }
             }
             if(!elm_found){
-                swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
+                //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
+                toastr.error('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
             }
         }
 
@@ -429,7 +437,8 @@ function rename_object(old_name, new_name){
                 }
             }
             if(!elm_found){
-                swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
+                //swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
+                toastr.error('There are multiple objects with the name \"' + old_name +"\".",'Please click on the object you want to rename and repeat your sentence!');
             }
         }
     }
@@ -439,7 +448,8 @@ function delete_object(name_object){
     var del_obj_list = find_object_by_name(name_object);
     var found_elm = false;
     if(del_obj_list == null){
-        swal("There is no object called \"" + name_object + "\".", "Can't delete object!");
+        //swal("There is no object called \"" + name_object + "\".", "Can't delete object!");
+        toastr.error("Can't delete object!","There is no object called \"" + name_object + "\".");
     }else if(del_obj_list.length == 1){
         class_buttons.deleteElement(del_obj_list[0]);
     }else{
@@ -451,7 +461,8 @@ function delete_object(name_object){
             }
         }
         if(found_elm == false){
-            swal("There are multiple objects with the name \"" + name_object + "\".", "Please click on the object you want to delete and repeat your sentence!");
+            //swal("There are multiple objects with the name \"" + name_object + "\".", "Please click on the object you want to delete and repeat your sentence!");
+            toastr.error("Please click on the object you want to delete and repeat your sentence!","There are multiple objects with the name \"" + name_object + "\".");
         }
     }  
 }
@@ -558,5 +569,5 @@ module.exports = {
     undo_primary_key: undo_primary_key,
     make_multi_valued: make_multi_valued,
     undo_multi_valued: undo_multi_valued,
-    swal_to_user: swal_to_user
+    //swal_to_user: swal_to_user
 }

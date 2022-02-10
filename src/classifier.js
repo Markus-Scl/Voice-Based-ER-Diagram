@@ -1,7 +1,6 @@
 //var BayesClassifier = require('bayes-classifier');
 var rita = require('../node_modules/rita');
 var classes = require('./classes');
-const classes_buttons = require('./classes_buttons');
 var class_buttons = require('./classes_buttons');
 
 
@@ -75,15 +74,17 @@ function find_do_name(input){
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to make multi-valued!", input);
         }
-        classes.swal_to_user("What is the name of the attribute you want to make multi-valued?", "Please repeat your whole sentence!");
+        //classes.swal_to_user("What is the name of the attribute you want to make multi-valued?", "Please repeat your whole sentence!");
+        toastr.error("Please repeat your whole sentence!","What is the name of the attribute you want to make multi-valued?");
     }else{
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to make primary key!", input);
         }
-        classes.swal_to_user("What is the name of the attribute you want to make primary key?", "Please repeat your whole sentence!");
+        //classes.swal_to_user("What is the name of the attribute you want to make primary key?", "Please repeat your whole sentence!");
+        toastr.error("Please repeat your whole sentence!", "What is the name of the attribute you want to make primary key?");
     }
     return null;
 }
@@ -99,15 +100,17 @@ function find_undo_name(input){
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to undo multi-valued!", input);
         }
-        classes.swal_to_user("What is the name of the multi-valued attribute you want to undo?", "Please repeat your whole sentence!");
+        //classes.swal_to_user("What is the name of the multi-valued attribute you want to undo?", "Please repeat your whole sentence!");
+        toastr.error("Please repeat your whole sentence!","What is the name of the multi-valued attribute you want to undo?");
     }else{
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to undo primary key!", input);
         }
-        classes.swal_to_user("What is the name of the primary key attribute you want to undo?", "Please repeat your whole sentence!");
+        //classes.swal_to_user("What is the name of the primary key attribute you want to undo?", "Please repeat your whole sentence!");
+        toastr.error("Please repeat your whole sentence!","What is the name of the primary key attribute you want to undo?");
     }
     return null;
 }
@@ -128,10 +131,11 @@ function find_rename_obj(input){
             
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of object to rename!", input);
     }
-    classes.swal_to_user("What object do you want to rename?","Please repeat your whole sentence!");
+    //classes.swal_to_user("What object do you want to rename?","Please repeat your whole sentence!");
+    toastr.error("Please repeat your whole sentence!","What object do you want to rename?");
     return null;
 }
 function find_delete_object(input){
@@ -148,10 +152,11 @@ function find_delete_object(input){
             return name_obj;
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of object to delete!", input);
     }
-    classes.swal_to_user("What object do you want to delete?","Please repeat your whole sentence!");
+    //classes.swal_to_user("What object do you want to delete?","Please repeat your whole sentence!");
+    toastr.error("Please repeat your whole sentence!","What object do you want to delete?");
     return null;
 }
 
@@ -171,7 +176,7 @@ function find_relationship_number(input){
                 number1 = 'N';
             }else{
                 //console.log("What are the numbers for the relationship?");
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't identify numbers for relationship!", input);
                 }
                 return null;
@@ -183,7 +188,7 @@ function find_relationship_number(input){
                 number2 = 'N';
             }else{
                 //console.log("What are the numbers for the relationship?");
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't identify numbers for relationship!", input);
                 }
                 return null;
@@ -192,20 +197,22 @@ function find_relationship_number(input){
             if(check_if_noun(entity1) && check_if_noun(entity2)){
                 return [number1, entity1, number2, entity2]; 
             }else{
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't identify entity-types for adding relationship numbers!", input);
                 }
                 //console.log('What are the names of the enitites to insert the numbers for the relatioship?');
-                classes.swal_to_user("What are the names of the entity-types for updating number of relationship?", "Pleas repeat your whole sentence!")
+                //classes.swal_to_user("What are the names of the entity-types for updating number of relationship?", "Pleas repeat your whole sentence!")
+                toastr.error("Pleas repeat your whole sentence!","What are the names of the entity-types for updating number of relationship?");
                 return null;
             }
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find numbers for relationship!", input);
     }
     //console.log("What are the numbers for the relationship?");
-    classes.swal_to_user("What are the numbers for the relationship?", "Pleas repeat your whole sentence!")
+    //classes.swal_to_user("What are the numbers for the relationship?", "Pleas repeat your whole sentence!")
+    toastr.error("Pleas repeat your whole sentence!","What are the numbers for the relationship?");
     return null;
 }
 
@@ -218,17 +225,19 @@ function find_relationship_name(input){
             if(check_if_noun(relationship_name) == false){
                 return relationship_name;
             }
-            if(classes_buttons.do_log){
+            if(class_buttons.do_log){
                 execute_ajax_error(class_buttons.user_id, "Couldn't find name of relationsship!", input);
             }
-            classes.swal_to_user("Relationship name can't be a noun!", "Pleas repeat your whole sentence!")
+            //classes.swal_to_user("Relationship name can't be a noun!", "Pleas repeat your whole sentence!")
+            toastr.error("Relationship name can't be a noun!", "Pleas repeat your whole sentence!", "");
             return null;
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of relationsship!", input);
     }
-    classes.swal_to_user("What is the name of the relationship?", "Please include the name of the relationship in you whole sentence!");
+    //classes.swal_to_user("What is the name of the relationship?", "Please include the name of the relationship in you whole sentence!");
+    toastr.error("Please include the name of the relationship in you whole sentence!","What is the name of the relationship?");
     return null;
 }
 
@@ -241,18 +250,20 @@ function find_attribute_name(input){
                 attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return attribute_name;
             }else{
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribut-type! Is not a noun!", input);
                 }
-                classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
+                //classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
+                toastr.error("Please rephrase and repeat your sentence!","Name of attribute isn't a noun!");
                 return null;
             }
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type!", input);
     }
-    classes.swal_to_user("What is the name of the Attribute?", "Please repeat in a whole sentence?");
+    //classes.swal_to_user("What is the name of the Attribute?", "Please repeat in a whole sentence?");
+    toastr.error("Please repeat in a whole sentence?","What is the name of the Attribute?");
     return null;
 }
 
@@ -265,17 +276,19 @@ function find_sub_attribute_name(input){
                 var sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return sub_attribute_name;
             }else{
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't find name of sub-attribute type! Must be a noun!", input);
                 }
-                classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
+                //classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
+                toastr.error("Please repeat in a whole sentence?","Name of sub attribute must be a noun!");
             }
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of sub attribute-type!", input);
     }
-    classes.swal_to_user("Couldn't find name for sub attribute!", "Please repeat in a whole sentence?");
+    //classes.swal_to_user("Couldn't find name for sub attribute!", "Please repeat in a whole sentence?");
+    toastr.error("Please repeat in a whole sentence?","Couldn't find name for sub attribute!");
 }
 
 function find_entity_names(input, bool_for_rel){
@@ -291,20 +304,22 @@ function find_entity_names(input, bool_for_rel){
                     list_entity_names.push(entity_name1);
                     list_entity_names.push(entity_name2);
                 }else{
-                    if(classes_buttons.do_log){
+                    if(class_buttons.do_log){
                         execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-types for creating relationsship! Entity-type names must be a noun!", input);
                     }
-                    classes.swal_to_user("What is the name of the entity types for the relationship?",null)
+                    //classes.swal_to_user("What is the name of the entity types for the relationship?",null)
+                    toastr.error("","What is the name of the entity types for the relationship?");
                 }
             }else{
                 if(check_if_noun(match[1])){
                     entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                     list_entity_names.push(entity_name);
                 }else{
-                    if(classes_buttons.do_log){
+                    if(class_buttons.do_log){
                         execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-type! Entity-type name must be a noun!", input);
                     }
-                    classes.swal_to_user("Name of entity must be a noun?",null);
+                    //classes.swal_to_user("Name of entity must be a noun?",null);
+                    toastr.error("","Name of entity must be a noun?");
                     list_entity_names.push(null);
                     return list_entity_names;
                 }
@@ -315,15 +330,17 @@ function find_entity_names(input, bool_for_rel){
     //Eliminate dublicats in list
     var set_entity_names = [...new Set(list_entity_names)];
     if(set_entity_names[0] == null && input.indexOf('attribute') == -1 && bool_for_rel == false){
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name for create entity-type!", input);
         }
-        classes.swal_to_user("What is the name of the entity-type you want to create?",null);
+        //classes.swal_to_user("What is the name of the entity-type you want to create?",null);
+        toastr.error("","What is the name of the entity-type you want to create?");
     }else if(set_entity_names[0] == null && input.indexOf('attribute') == -1 && bool_for_rel == true){
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find names of entity-types to create relationship!", input);
         }
-        classes.swal_to_user("Between what entity-types do you want to create a relationship?",'Please repeat whole sentence!');
+        //classes.swal_to_user("Between what entity-types do you want to create a relationship?",'Please repeat whole sentence!');
+        toastr.error('Please repeat whole sentence!',"Between what entity-types do you want to create a relationship?");
     }
     return set_entity_names;
 }
@@ -340,16 +357,17 @@ function find_entities_for_isa(input){
                 list_entity_names.push(entity_name1);
                 list_entity_names.push(entity_name2);
             }else{
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type! Names must be a noun!", input);
                 }
-                classes.swal_to_user("What are the names of the entity types for isa type? Names of entity-types must be a noun!",null);
+                //classes.swal_to_user("What are the names of the entity types for isa type? Names of entity-types must be a noun!",null);
+                toastr.error("","What are the names of the entity types for isa type? Names of entity-types must be a noun!");
                 list_entity_names.push(null);
                 return list_entity_names;
             }
         }
     }
-    if(classes_buttons.do_log){
+    if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type!", input);
     }
     classes.swal_to_user("What are the names of the entity types for isa type?",null);
@@ -384,7 +402,7 @@ function execute_speech(input){
             //console.log('Entity will be created');
             var param = find_entity_names(input,false);
             //console.log('Name of Entity: ' + param[0]);
-            if(classes_buttons.do_log){
+            if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create entity-type", input);
             }
             classes.create_entity_type(param[0]);
@@ -400,7 +418,7 @@ function execute_speech(input){
                 //console.log('Multi valued will be created');
                 var is_primary_key = false;
                 var is_multi_valued = true;
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create multi valued attribute-type", input);
                 }
                 classes.create_attribute_type(param_attribute, param_entity[0], is_primary_key, is_multi_valued);
@@ -409,7 +427,7 @@ function execute_speech(input){
                 //console.log('Primary key will be created');
                 var is_primary_key = true;
                 var is_multi_valued = false;
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create attribute-type as primary key", input);
                 }
                 classes.create_attribute_type(param_attribute, param_entity[0], is_primary_key, is_multi_valued);
@@ -418,7 +436,7 @@ function execute_speech(input){
                 //console.log('Attribute will be created');
                 var is_primary_key = false;
                 var is_multi_valued = false;
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create attribute-type", input);
                 }
                 classes.create_attribute_type(param_attribute, param_entity[0], is_primary_key, is_multi_valued);
@@ -428,7 +446,7 @@ function execute_speech(input){
             var param_sub_attribute = find_sub_attribute_name(input);
             var param_attribute = find_attribute_name(input);
             var param_entity = find_entity_names(input,false);
-            if(classes_buttons.do_log){
+            if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create sub attribute-type", input);
             }
             if (param_sub_attribute != null && param_attribute != null){
@@ -441,7 +459,7 @@ function execute_speech(input){
             //console.log('Relationship will be created');
             var param_relationship = find_relationship_name(input);
             var param_entities = find_entity_names(input, true);
-            if(classes_buttons.do_log){
+            if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create relationship-type", input);
             }
             if(param_relationship != null && param_entities != null && param_entities.length == 2){
@@ -454,7 +472,7 @@ function execute_speech(input){
     //Create isa type
     }else if(input.indexOf('is a') != -1 || input.indexOf('inherits from') != -1 || input.indexOf('inherit from') != -1 || input.indexOf('is a child of') != -1){
         //console.log("Create isa type");
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Create isa-type", input);
         }
         var entities_for_isa = find_entities_for_isa(input,false);
@@ -468,7 +486,7 @@ function execute_speech(input){
     //Create value for label
     }else if(input.indexOf('several') != -1 || input.indexOf('multiple') != -1 || input.indexOf('a lot of') != -1 || input.indexOf('many') != -1 || input.indexOf('numerous') != -1 || input.indexOf('plenty of') != -1 || input.indexOf('one') != -1 || input.indexOf('1') != -1){
         //console.log('Number relationship will be created');
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Update numbers for relationsship-type", input);
         }
         var param_relation_numbers = find_relationship_number(input);
@@ -485,7 +503,7 @@ function execute_speech(input){
     //Update objects (change name)
     }else if(input.indexOf('update') != -1 || input.indexOf('change') != -1 || input.indexOf('rename') != -1){
         //console.log('update');
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Rename element", input);
         }
         var params_rename = find_rename_obj(input);
@@ -494,7 +512,7 @@ function execute_speech(input){
     //Delet objects
     }else if (input.indexOf('delete') != -1 || input.indexOf('remove') != -1 || input.indexOf('cancel') != -1){
         //console.log("Delete");
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Delete element", input);
         }
         var param_delete = find_delete_object(input);
@@ -503,7 +521,7 @@ function execute_speech(input){
         //Undo primary key or multivalued
         if(input.indexOf('undo') != -1 || input.indexOf('make') != -1 && input.indexOf('not') != -1 || input.indexOf('make') != -1 && input.indexOf('single valued') != -1){
             if(input.indexOf('primary key') != -1){
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo primary key", input);
                 }
                 //console.log("undo primary key");
@@ -513,7 +531,7 @@ function execute_speech(input){
                 }
             }else if(input.indexOf('multi valued') != -1 || input.indexOf('single valued') || input.indexOf('multi-valued') != -1 || input.indexOf('single-valued')){
                 //console.log("undo multi valued");
-                if(classes_buttons.do_log){
+                if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo multivalued", input);
                 }
                 var param_undo = find_undo_name(input);
@@ -526,19 +544,19 @@ function execute_speech(input){
         //Make attribute multivalued or as primary key
         }else if(input.indexOf('make') != -1 && input.indexOf('not') == -1){
             //Make attribute primary key
-            if(classes_buttons.do_log){
+            if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Make attribute-type primary key or multi-valued", input);
             }
             var param_do = find_do_name(input);
             if(param_do != null){
                 if(input.indexOf('primary key') != -1){
-                    if(classes_buttons.do_log){
+                    if(class_buttons.do_log){
                         execute_ajax(class_buttons.user_id, "Make attribute-type primary key", input);
                     }
                     //console.log("Make attribute primary key!");
                     classes.make_primary_key(param_do);
                 }else if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
-                    if(classes_buttons.do_log){
+                    if(class_buttons.do_log){
                         execute_ajax(class_buttons.user_id, "Make attribute-type multi-valued", input);
                     }
                     classes.make_multi_valued(param_do);
@@ -548,10 +566,11 @@ function execute_speech(input){
     }
     else{
         //console.log("Can't identify action");
-        if(classes_buttons.do_log){
+        if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Could not identity any action!", input);
         }
-        classes.swal_to_user("What do you want to do?", "Could not identify any action!");
+        //classes.swal_to_user("What do you want to do?", "Could not identify any action!");
+        toastr.error("Could not identify any action!","What do you want to do?");
     }
 }
 

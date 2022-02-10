@@ -1,9 +1,11 @@
 .whole-site{
     height: 100vh;
+    position: relative;
 }
 .drawing-container{
     height: 77%;
     border: 8px solid black;
+    position: relative;
 }
 .headline-container{
     background-color: black;
@@ -299,3 +301,6 @@ box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 
     font-size: 12px;
   }
   
+.toastr{
+    margin-top: 100px;
+}
