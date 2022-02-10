@@ -2,7 +2,7 @@ var joint = require('../node_modules/jointjs');
 var uniqid = require('../node_modules/uniqid');
 
 let user_id = uniqid();
-const do_log = false;
+const do_log = true;
 
 
 const ent_button = document.getElementById('ent_button');
