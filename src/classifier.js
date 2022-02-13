@@ -1,22 +1,22 @@
 //var BayesClassifier = require('bayes-classifier');
-var rita = require('../node_modules/rita');
-var classes = require('./classes');
-var class_buttons = require('./classes_buttons');
+const rita = require('../node_modules/rita');
+const classes = require('./classes');
+const class_buttons = require('./classes_buttons');
 
 
-var regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,];
-var regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-var regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-var regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
-var regex_find_number_relationship = [/(one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/];
-var regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-var regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
-var regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
-var regex_find_undo = [/undo (?:primary key|multi valued|multi-valued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
-var regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) is (?:primary key|multi valued|multi-valued)/g];
-var regex_noun = /nn.*/;
+const regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,];
+const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
+const regex_find_number_relationship = [/(one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/];
+const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
+const regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
+const regex_find_undo = [/undo (?:primary key|multi valued|multi-valued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
+const regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) is (?:primary key|multi valued|multi-valued)/g];
+const regex_noun = /nn.*/;
 
-var dict_replace = {};
+const dict_replace = {};
 dict_replace['38'] = "create";
 dict_replace['8'] = "create";
 dict_replace['3 8'] = "create";
@@ -24,7 +24,7 @@ dict_replace['3/8'] = "create";
 dict_replace['a tribute'] = "attribute";
 
 function replace_common_mistakes(input, dict){
-    for(var key in dict){
+    for(let key in dict){
         if(input.indexOf(key) != -1){
             input = input.replace(key, dict[key]);
         }
@@ -33,10 +33,10 @@ function replace_common_mistakes(input, dict){
 }
 
 function preprocess_sentence(input){
-    var tokens = rita.tokenize(input);
-    var sentence_conjugated = "";
+    let tokens = rita.tokenize(input);
+    let sentence_conjugated = "";
 
-    for(var i = 0; i < tokens.length; i++){
+    for(let i = 0; i < tokens.length; i++){
         if(/nn.*/.test(rita.pos(tokens[i]))){
             if(i == tokens.length -1){
                 sentence_conjugated += rita.singularize(tokens[i]);
@@ -63,11 +63,11 @@ function check_if_noun(word){
 }
 
 function find_do_name(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_do.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_do.length; i++){
         regex_find_do[i].lastIndex = 0;
         while(match = regex_find_do[i].exec(sentence_preprocessed)){
-            var name_do = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            let name_do = match[1].charAt(0).toUpperCase() + match[1].slice(1);
             if(check_if_noun(name_do)){
                 return name_do;
             }
@@ -89,11 +89,11 @@ function find_do_name(input){
     return null;
 }
 function find_undo_name(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_undo.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_undo.length; i++){
         regex_find_undo[i].lastIndex = 0;
         while(match = regex_find_undo[i].exec(sentence_preprocessed)){
-            var name_undo = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            let name_undo = match[1].charAt(0).toUpperCase() + match[1].slice(1);
             if(check_if_noun(name_undo)){
                 return name_undo;
             }
@@ -115,12 +115,12 @@ function find_undo_name(input){
     return null;
 }
 function find_rename_obj(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_update_names.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_update_names.length; i++){
         regex_find_update_names[i].lastIndex = 0;
         while(match = regex_find_update_names[i].exec(sentence_preprocessed)){
-            var old_name = match[1];
-            var new_name = match[2];
+            let old_name = match[1];
+            let new_name = match[2];
             if(check_if_noun(old_name) && check_if_noun(new_name)){
                 old_name = old_name.charAt(0).toUpperCase() + old_name.slice(1);
                 new_name = new_name.charAt(0).toUpperCase() + new_name.slice(1);
@@ -139,11 +139,11 @@ function find_rename_obj(input){
     return null;
 }
 function find_delete_object(input){
-    var sentence_preprocessed = preprocess_sentence(input); 
-    for(var i = 0; i < regex_delete_object.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input); 
+    for(let i = 0; i < regex_delete_object.length; i++){
         regex_delete_object[i].lastIndex = 0;
         while(match = regex_delete_object[i].exec(sentence_preprocessed)){
-            var name_obj;
+            let name_obj;
             if(check_if_noun(match[1]) == true){
                 name_obj = match[1].charAt(0).toUpperCase() + match[1].slice(1);
             }else{
@@ -161,15 +161,15 @@ function find_delete_object(input){
 }
 
 function find_relationship_number(input){
-    var sentence_preprocessed = preprocess_sentence(input); 
-    for(var i = 0; i < regex_find_number_relationship.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input); 
+    for(let i = 0; i < regex_find_number_relationship.length; i++){
         regex_find_number_relationship[i].lastIndex = 0;
         while(match = regex_find_number_relationship[i].exec(sentence_preprocessed)){
             regex_find_number_relationship[i].lastIndex = 0;
-            var number1 = match[1];
-            var entity1 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
-            var number2 = match[3];
-            var entity2 = match[4].charAt(0).toUpperCase() + match[4].slice(1);
+            let number1 = match[1];
+            let entity1 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
+            let number2 = match[3];
+            let entity2 = match[4].charAt(0).toUpperCase() + match[4].slice(1);
             if(['one', '1', 'a'].includes(number1)){
                 number1 = '1';
             } else if(['many', 'several', 'multiple', 'a lot of', 'n', 'm'].includes(number1)){
@@ -217,8 +217,8 @@ function find_relationship_number(input){
 }
 
 function find_relationship_name(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_relationship.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_relationship.length; i++){
         regex_find_relationship[i].lastIndex = 0;
         while(match = regex_find_relationship[i].exec(sentence_preprocessed)){
             relationship_name = match[1];
@@ -242,8 +242,8 @@ function find_relationship_name(input){
 }
 
 function find_attribute_name(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_attributes.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_attributes.length; i++){
         regex_find_attributes[i].lastIndex = 0;
         while(match = regex_find_attributes[i].exec(sentence_preprocessed)){
             if(check_if_noun(match[1])){
@@ -268,12 +268,12 @@ function find_attribute_name(input){
 }
 
 function find_sub_attribute_name(input){
-    var sentence_preprocessed = preprocess_sentence(input);
-    for(var i = 0; i < regex_find_sub_attribute.length; i++){
+    let sentence_preprocessed = preprocess_sentence(input);
+    for(let i = 0; i < regex_find_sub_attribute.length; i++){
         regex_find_sub_attribute[i].lastIndex = 0;
         while(match = regex_find_sub_attribute[i].exec(sentence_preprocessed)){
             if(check_if_noun(match[1])){
-                var sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+                let sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return sub_attribute_name;
             }else{
                 if(class_buttons.do_log){
@@ -292,9 +292,9 @@ function find_sub_attribute_name(input){
 }
 
 function find_entity_names(input, bool_for_rel){
-    var sentence_preprocessed = preprocess_sentence(input);
+    let sentence_preprocessed = preprocess_sentence(input);
     list_entity_names = [];
-    for(var i = 0; i < regex_find_entities.length; i++){
+    for(let i = 0; i < regex_find_entities.length; i++){
         regex_find_entities[i].lastIndex = 0;
         while(match = regex_find_entities[i].exec(sentence_preprocessed)){
             if(match.length == 3){
@@ -328,7 +328,7 @@ function find_entity_names(input, bool_for_rel){
 
     }
     //Eliminate dublicats in list
-    var set_entity_names = [...new Set(list_entity_names)];
+    let set_entity_names = [...new Set(list_entity_names)];
     if(set_entity_names[0] == null && input.indexOf('attribute') == -1 && bool_for_rel == false){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name for create entity-type!", input);
@@ -346,9 +346,9 @@ function find_entity_names(input, bool_for_rel){
 }
 
 function find_entities_for_isa(input){
-    var sentence_preprocessed = preprocess_sentence(input);
+    let sentence_preprocessed = preprocess_sentence(input);
     list_entity_names = [];
-    for(var i = 0; i < regex_find_isa.length; i++){
+    for(let i = 0; i < regex_find_isa.length; i++){
         regex_find_isa[i].lastIndex = 0;
         while(match = regex_find_isa[i].exec(sentence_preprocessed)){
             if(check_if_noun(match[1]) && check_if_noun(match[2])){
@@ -370,7 +370,8 @@ function find_entities_for_isa(input){
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type!", input);
     }
-    classes.swal_to_user("What are the names of the entity types for isa type?",null);
+    //classes.swal_to_user("What are the names of the entity types for isa type?",null);
+    toastr.error("","What are the names of the entity types for isa type?");
     return list_entity_names;
 }
 
@@ -400,7 +401,7 @@ function execute_speech(input){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
-            var param = find_entity_names(input,false);
+            let param = find_entity_names(input,false);
             //console.log('Name of Entity: ' + param[0]);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create entity-type", input);
@@ -409,15 +410,16 @@ function execute_speech(input){
         //Create attributes
         }else if(input.indexOf('sub attribute') == -1 && input.indexOf('attribute') != -1){
             //console.log("Create Attribute");
-            var param_attribute = find_attribute_name(input);
+            let param_attribute = find_attribute_name(input);
+            let param_entity = null;
             if(param_attribute != null){
-                var param_entity = find_entity_names(input,false);
+                param_entity = find_entity_names(input,false);
             }
             //Create multi valued attribute
             if(input.indexOf('multi valued') != -1){
                 //console.log('Multi valued will be created');
-                var is_primary_key = false;
-                var is_multi_valued = true;
+                let is_primary_key = false;
+                let is_multi_valued = true;
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create multi valued attribute-type", input);
                 }
@@ -425,8 +427,8 @@ function execute_speech(input){
             //Create attribute as primary key
             }else if(input.indexOf('primary key') != -1){
                 //console.log('Primary key will be created');
-                var is_primary_key = true;
-                var is_multi_valued = false;
+                let is_primary_key = true;
+                let is_multi_valued = false;
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create attribute-type as primary key", input);
                 }
@@ -434,8 +436,8 @@ function execute_speech(input){
             //Create normal attribute
             }else{
                 //console.log('Attribute will be created');
-                var is_primary_key = false;
-                var is_multi_valued = false;
+                let is_primary_key = false;
+                let is_multi_valued = false;
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Create attribute-type", input);
                 }
@@ -443,9 +445,9 @@ function execute_speech(input){
             }
         //Create sub attribute
         }else if(input.indexOf('entity') == -1 && input.indexOf('sub attribute') != -1){
-            var param_sub_attribute = find_sub_attribute_name(input);
-            var param_attribute = find_attribute_name(input);
-            var param_entity = find_entity_names(input,false);
+            let param_sub_attribute = find_sub_attribute_name(input);
+            let param_attribute = find_attribute_name(input);
+            let param_entity = find_entity_names(input,false);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create sub attribute-type", input);
             }
@@ -457,8 +459,8 @@ function execute_speech(input){
         //create relationship
         }else if(input.indexOf('relationship') != -1 && input.indexOf('attribute') == -1){
             //console.log('Relationship will be created');
-            var param_relationship = find_relationship_name(input);
-            var param_entities = find_entity_names(input, true);
+            let param_relationship = find_relationship_name(input);
+            let param_entities = find_entity_names(input, true);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create relationship-type", input);
             }
@@ -475,7 +477,7 @@ function execute_speech(input){
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Create isa-type", input);
         }
-        var entities_for_isa = find_entities_for_isa(input,false);
+        let entities_for_isa = find_entities_for_isa(input,false);
         if(entities_for_isa[0] != null){
             //console.log("Name of first Entity: " + entities_for_isa[0]);
             //console.log("Name of second Entity: " + entities_for_isa[1]);
@@ -489,7 +491,7 @@ function execute_speech(input){
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Update numbers for relationsship-type", input);
         }
-        var param_relation_numbers = find_relationship_number(input);
+        let param_relation_numbers = find_relationship_number(input);
         if(param_relation_numbers != null){
             if(param_relation_numbers[0] == "N" && param_relation_numbers[2] == "N"){
                 param_relation_numbers[2] = "M";
@@ -506,7 +508,7 @@ function execute_speech(input){
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Rename element", input);
         }
-        var params_rename = find_rename_obj(input);
+        let params_rename = find_rename_obj(input);
         //console.log(params_rename);
         classes.rename_object(params_rename[0], params_rename[1]);
     //Delet objects
@@ -515,7 +517,7 @@ function execute_speech(input){
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Delete element", input);
         }
-        var param_delete = find_delete_object(input);
+        let param_delete = find_delete_object(input);
         classes.delete_object(param_delete);
     }else if(input.indexOf('undo') != -1 || input.indexOf('make') != -1){
         //Undo primary key or multivalued
@@ -525,7 +527,7 @@ function execute_speech(input){
                     execute_ajax(class_buttons.user_id, "Undo primary key", input);
                 }
                 //console.log("undo primary key");
-                var param_undo = find_undo_name(input);
+                let param_undo = find_undo_name(input);
                 if(param_undo != null){
                     classes.undo_primary_key(param_undo);
                 }
@@ -534,7 +536,7 @@ function execute_speech(input){
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo multivalued", input);
                 }
-                var param_undo = find_undo_name(input);
+                let param_undo = find_undo_name(input);
                 if(param_undo != null){
                     classes.undo_multi_valued(param_undo);
                 }
@@ -547,7 +549,7 @@ function execute_speech(input){
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Make attribute-type primary key or multi-valued", input);
             }
-            var param_do = find_do_name(input);
+            let param_do = find_do_name(input);
             if(param_do != null){
                 if(input.indexOf('primary key') != -1){
                     if(class_buttons.do_log){

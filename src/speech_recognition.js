@@ -1,4 +1,4 @@
-var classifier = require('./classifier');
+const classifier = require('./classifier');
 
 const textbox = document.getElementById("textbox");
 const micBtn = document.getElementById("voiceButton");  
@@ -14,7 +14,7 @@ recognition.lang = 'en-US';
 
 
 micBtn.addEventListener("click", start_or_stop_recording);
-var started = false;
+let started = false;
 
 function start_or_stop_recording(){
     if(started == false){
@@ -59,11 +59,11 @@ function endSpeechRecognition(){
 
 recognition.addEventListener("result", resultOfSpeechRecognition);
 
-var fianl_transcript = '';
+let fianl_transcript = '';
 
 function resultOfSpeechRecognition(event){
-    var interim_transcript = '';
-    for(var i = event.resultIndex; i < event.results.length; ++i){
+    let interim_transcript = '';
+    for(let i = event.resultIndex; i < event.results.length; ++i){
         if(event.results[i].isFinal){
             fianl_transcript += event.results[i][0].transcript;
         }else{

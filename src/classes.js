@@ -1,13 +1,13 @@
-var class_buttons = require('./classes_buttons');
+const class_buttons = require('./classes_buttons');
 const levenshtein = require('../node_modules/js-levenshtein');
-var swal = require('../node_modules/sweetalert');
+//const swal = require('../node_modules/sweetalert');
 
 
 
-var erd = class_buttons.erd;
-var graph = class_buttons.graph;
-var paper = class_buttons.paper;
-var highlighter = class_buttons.highlighter;
+const erd = class_buttons.erd;
+const graph = class_buttons.graph;
+const paper = class_buttons.paper;
+//const highlighter = class_buttons.highlighter;
 
 //Helpers
 function get_levenshtein(word_input, name_object){
@@ -21,40 +21,37 @@ function get_length_of_shorter_word(word1, word2){
 }
 //Helper functions to find objects by name
 function find_entity_object_by_name(name_entity){
-    if(name_entity != null){
-        const elementsList = graph.getElements();
-        var list_lev = [];
-        for(elm in elementsList){
-            var elementType = String(elementsList[elm].attributes.type);
-            if(elementType.includes("Entity")){
-                element_name = elementsList[elm].attr("text/text");
-                //Calculate difference between words
-                list_lev.push(get_levenshtein(name_entity, element_name));
-                if(element_name == name_entity){
-                    return elementsList[elm];
-                }
+    if(name_entity == null){
+        return null
+    }
+    let elementsList = graph.getElements();
+    let list_lev = [];
+    for(elm in elementsList){
+        let elementType = String(elementsList[elm].attributes.type);
+        if(elementType.includes("Entity")){
+            element_name = elementsList[elm].attr("text/text");
+            //Calculate difference between words
+            list_lev.push(get_levenshtein(name_entity, element_name));
+            if(element_name == name_entity){
+                return elementsList[elm];
             }
         }
-        //Didn't understand the right word from user input, takes the closest word instead (if there is one)
-        list_lev.sort();
-        if(list_lev[0][0] < 1){
-            var closest_word = list_lev[0][1];
-            var ent_obj = find_entity_object_by_name(closest_word);
-            return ent_obj;
-        }else{
-            return null;
-        }
-    }else{
+    }
+    //Didn't understand the right word from user input, takes the closest word instead (if there is one)
+    list_lev.sort();
+    if(list_lev[0][0] >= 1){
         return null;
     }
-    
+    let closest_word = list_lev[0][1];
+    let ent_obj = find_entity_object_by_name(closest_word);
+    return ent_obj;
 }
 function find_attribute_object_by_name(name_attribute){
-    const elementsList = graph.getElements();
-    var list_attr = [];
-    var list_lev = [];
+    let elementsList = graph.getElements();
+    let list_attr = [];
+    let list_lev = [];
     for(elm in elementsList){
-        var elementType = String(elementsList[elm].attributes.type);
+        let elementType = String(elementsList[elm].attributes.type);
         if(elementType.includes("Normal")){
             element_name = elementsList[elm].attr("text/text");
             list_lev.push(get_levenshtein(name_attribute, element_name));
@@ -64,21 +61,21 @@ function find_attribute_object_by_name(name_attribute){
         }
     }
     
-    if(list_attr.length == null){
-        list_lev.sort();
-        if(list_lev[0][0] < 1){
-            var closest_word = list_lev[0][1];
-            var attr_obj = find_attribute_object_by_name(closest_word);
-            return [attr_obj];
-        }else{
-            return null;
-        }
+    if(list_attr.length != null){
+        return list_attr;
     }
-    return list_attr;
+    list_lev.sort();
+    if(list_lev[0][0] >= 1){
+        return null;
+    }
+    let closest_word = list_lev[0][1];
+    let attr_obj = find_attribute_object_by_name(closest_word);
+    return [attr_obj];
 }
+
 function find_attribute_of_object(ent_obj, name_attribute){
-    var list_attrs = ent_obj.attributes.listChildren;
-    var list_lev = [];
+    let list_attrs = ent_obj.attributes.listChildren;
+    let list_lev = [];
     for(attr_obj in list_attrs){
         list_lev.push(get_levenshtein(name_attribute, list_attrs[attr_obj].attr("text/text")));
         if(list_attrs[attr_obj].attr("text/text") == name_attribute){
@@ -86,13 +83,12 @@ function find_attribute_of_object(ent_obj, name_attribute){
         }
     }
     list_lev.sort();
-    if(list_lev[0][0] < 1){
-        var closest_word = list_lev[0][1];
-        var attr_obj = find_attribute_of_object(closest_word);
-        return attr_obj;
-    }else{
+    if(list_lev[0][0] >= 1){
         return null;
     }
+    let closest_word = list_lev[0][1];
+    let attr_obj = find_attribute_of_object(closest_word);
+    return attr_obj;
 }
 
 /*function find_relationship(name_second_entity, ent_obj){
@@ -105,33 +101,30 @@ function find_attribute_of_object(ent_obj, name_attribute){
 }*/
 
 function find_object_by_name(name_object){
-    var elementsList = graph.getElements();
-    var match_elements = [];
-    var list_lev = [];
+    let elementsList = graph.getElements();
+    let match_elements = [];
+    let list_lev = [];
     for(elm in elementsList){
-        var element_name = elementsList[elm].attr("text/text");
+        let element_name = elementsList[elm].attr("text/text");
         list_lev.push(get_levenshtein(name_object, element_name));
         if(element_name == name_object){
             match_elements.push(elementsList[elm]);
         }
     }
-    if(match_elements.length == 0){
-        list_lev.sort();
-        if(list_lev[0][0] < 0.7){
-            var closest_word = list_lev[0][1];
-            var obj_list = find_object_by_name(closest_word);
-            return obj_list;
-        }else{
-            return null;
-        }
+    if(match_elements.length != 0){
+        return match_elements;
     }
-    /*if(match_elements.length == 0){
+    list_lev.sort();
+    let threshold_value_for_word_beiing_similar = 0.7;
+    if(list_lev[0][0] >= threshold_value_for_word_beiing_similar){
         return null;
-    }*/
-    return match_elements;
+    }
+    let closest_word = list_lev[0][1];
+    let obj_list = find_object_by_name(closest_word);
+    return obj_list;
 }
 function get_elements_by_id(id){
-    var elementsList = graph.getElements();
+    let elementsList = graph.getElements();
     for(i in elementsList){
         if(elementsList[i].id == id){
             return elementsList[i];
@@ -141,7 +134,7 @@ function get_elements_by_id(id){
 }
 
 function get_links_by_id(id){
-    var linksList = graph.getLinks();
+    let linksList = graph.getLinks();
     for(i in linksList){
         if(linksList[i].id == id){
             return linksList[i];
@@ -152,8 +145,8 @@ function get_links_by_id(id){
 
 //Functions for creating objects
 function create_isa_type(name_child, name_parent){
-    var child_ent = find_entity_object_by_name(name_child);
-    var parent_ent = find_entity_object_by_name(name_parent);
+    let child_ent = find_entity_object_by_name(name_child);
+    let parent_ent = find_entity_object_by_name(name_parent);
     if(child_ent.attributes.inhertitanceConnectionToParent.length == 0){
         make_new_isa_connection(child_ent, parent_ent);
     }else{
@@ -164,7 +157,7 @@ function create_isa_type(name_child, name_parent){
 
 function create_entity_type(name_entity){
     if(name_entity != null){
-        var ent_obj = new class_buttons.Entity;
+        let ent_obj = new class_buttons.Entity;
         ent_obj.attr("text/text", name_entity); 
 
         ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
@@ -175,51 +168,56 @@ function create_entity_type(name_entity){
     }
 }
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
-    var list_entities = class_buttons.findAllEntities();
+    let list_entities = class_buttons.findAllEntities();
     if(list_entities.length == 0){
         //swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
         toastr.error("","You need to create an entity-type first before adding an attribute-type!");
-    }else{
-        var attr_obj = new class_buttons.Attribute();
-        attr_obj.attr("text/text", name_attribute); 
-        if(is_primary_key){
-            attr_obj.attr("text/text-decoration", "underline");
-        }
-        if(is_multi_valued){
-            makeAttributeMultivalued(attr_obj);
-        }
-    
-        ent_obj = find_entity_object_by_name(name_entity);
-        if(ent_obj != null){
-            attr_obj.position(ent_obj.position().x-30+Math.floor(Math.random()*60),
-                ent_obj.position().y-30+Math.floor(Math.random()*60));
-            
-            attr_obj.attributes.listParent.push(ent_obj.id);
-    
-            graph.addCell(attr_obj);
-            class_buttons.createLink(ent_obj, attr_obj);
-            ent_obj.attributes.listChildren.push(attr_obj.id);
-            class_buttons.highlightElement(attr_obj);
-        }else if(currentElement != null){
-            attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
-                currentElement.position().y-120+Math.floor(Math.random()*240));
-                
-            attr_obj.attributes.listParent.push(currentElement.id);
-    
-            graph.addCell(attr_obj);
-            class_buttons.createLink(currentElement, attr_obj);
-            currentElement.attributes.listChildren.push(attr_obj.id);
-            class_buttons.highlightElement(attr_obj);
-        }
+        return;
     }
+    let attr_obj = new class_buttons.Attribute();
+    attr_obj.attr("text/text", name_attribute); 
+    if(is_primary_key){
+        attr_obj.attr("text/text-decoration", "underline");
+    }
+    if(is_multi_valued){
+        makeAttributeMultivalued(attr_obj);
+    }
+
+    ent_obj = find_entity_object_by_name(name_entity);
+    if(ent_obj != null){
+        attr_obj.position(ent_obj.position().x-30+Math.floor(Math.random()*60),
+            ent_obj.position().y-30+Math.floor(Math.random()*60));
+        
+        attr_obj.attributes.listParent.push(ent_obj.id);
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(ent_obj, attr_obj);
+        ent_obj.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    }else if(currentElement != null){
+        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
+            currentElement.position().y-120+Math.floor(Math.random()*240));
+            
+        attr_obj.attributes.listParent.push(currentElement.id);
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(currentElement, attr_obj);
+        currentElement.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    }
+    
 }
 
 function create_sub_attribute_type(name_sub_attribute, name_attribute, name_entity){
-    var list_attr = find_attribute_object_by_name(name_attribute);
+    let list_attr = find_attribute_object_by_name(name_attribute);
+    if(list_attr == null){
+        toastr.error( "Please repeat you sentence for creating a sub attribute-type!","Could not find attribute with name \"" + name_attribute + "\"");
+        return
+    }
     //There is only one attribut with that name
-    if(list_attr.length == 1){
-        var attr_obj = list_attr[0];
-        var sub_attr_obj = new class_buttons.Attribute();
+    else if(list_attr.length == 1){
+        let attr_obj = list_attr[0];
+        let sub_attr_obj = new class_buttons.Attribute();
         sub_attr_obj.attr("text/text", name_sub_attribute);
 
         sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
@@ -232,52 +230,43 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
         graph.addCell(sub_attr_obj);
         class_buttons.createLink(attr_obj,sub_attr_obj);
         class_buttons.highlightElement(sub_attr_obj);
-    //There are more attributes with that name
-    }else{
-        if(name_entity == null){
-            //swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
-            toastr.error( "Please mention the name of the entity aswell!","There are multiple attributes with the name \"" + name_attribute + "\"");
-        }else{
-            var ent_obj = find_entity_object_by_name(name_entity);
-            if(ent_obj != null){
-                var attr_obj = find_attribute_of_object(ent_obj, name_attribute);
-                if(attr_obj != null){
-                    var sub_attr_obj = new class_buttons.Attribute();
-                    sub_attr_obj.attr("text/text", name_sub_attribute);
-
-                    sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
-                        attr_obj.position().y-120+Math.floor(Math.random()*240));
-            
-                    sub_attr_obj.attributes.listParent.push(attr_obj.id);
-                    attr_obj.attributes.listChildren.push(sub_attr_obj.id);
-            
-                    graph.addCell(sub_attr_obj);
-                    class_buttons.createLink(attr_obj,sub_attr_obj);
-                    class_buttons.highlightElement(sub_attr_obj);
-                }else{
-                    //console.log("Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
-                    //swal("Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
-                    toastr.error("","Can not find attribute named \"" + name_attribute + "\" from entity \"" + name_entity + "\"");
-                }
-            }else{
-                //console.log("Can not find entity named \"" + name_entity + "\"");
-                //swal("Can not find entity named \"" + name_entity + "\"");
-                toastr.error("","Can not find entity named \"" + name_entity + "\"");
-            }
-        }
+        return;
     }
+    //There are more attributes with that name
+    let attr_obj = null;
+
+    for(i in list_attr){
+        if(list_attr[i] == currentElement);
+        attr_obj = list_attr[i];
+    }
+    if(attr_obj == null){
+        //swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
+        toastr.error( "Please click on the attribute where you want to add a sub attribute!","There are multiple attributes with the name \"" + name_attribute + "\"");
+        return;
+    }
+
+    let sub_attr_obj = new class_buttons.Attribute();
+    sub_attr_obj.attr("text/text", name_sub_attribute);
+
+    sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
+        attr_obj.position().y-120+Math.floor(Math.random()*240));
+
+    sub_attr_obj.attributes.listParent.push(attr_obj.id);
+
+    attr_obj.attributes.listChildren.push(sub_attr_obj.id);
+
+    graph.addCell(sub_attr_obj);
+    class_buttons.createLink(attr_obj,sub_attr_obj);
+    class_buttons.highlightElement(sub_attr_obj);    
 }
 
 function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
-    
-    var ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    
-    var ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    
+    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
+    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
 
     //Every entity-type knows their whole relationsships
     if(ent_obj_1 != null && ent_obj_2 != null){
-        var rel_obj = new class_buttons.Relationship();
+        let rel_obj = new class_buttons.Relationship();
         rel_obj.attr("text/text", name_relationship);
 
         rel_obj.position((ent_obj_1.position().x + ent_obj_2.position().x)/2, 
@@ -294,19 +283,19 @@ function create_relationship_type(name_relationship, name_entity_1, name_entity_
 }
 
 function create_relationship_connection_1(curr_rel_obj, ent_obj){
-    var first_link = class_buttons.createLink(curr_rel_obj, ent_obj);
+    let first_link = class_buttons.createLink(curr_rel_obj, ent_obj);
     first_link.set(create_label("1"));
     curr_rel_obj.attributes.firstConnectionLink = first_link.id;
     curr_rel_obj.attributes.firstConnectionObject = ent_obj.id;
 }
 
 function create_relationship_connection_2(curr_rel_obj, ent_obj){
-    var second_link = class_buttons.createLink(curr_rel_obj, ent_obj);
+    let second_link = class_buttons.createLink(curr_rel_obj, ent_obj);
     second_link.set(create_label("1"));
     curr_rel_obj.attributes.secondConnectionLink = second_link.id;
     curr_rel_obj.attributes.secondConnectionObject = ent_obj.id;
 }
-var create_label = function(txt) {
+let create_label = function(txt) {
     return {
         labels: [{
             position: 0.3,
@@ -329,124 +318,130 @@ var create_label = function(txt) {
 
 //Helpers to change appearance of objects
 function make_primary_key(name_attr){
-    var attr_objs = find_attribute_object_by_name(name_attr);
-    var elm_found = false;
-    if(attr_objs != null){
-        if(attr_objs.length == 1){
-            attr_objs[0].attr("text/text-decoration", "underline");
-        }else{
-            for(elm in attr_objs){
-                if(attr_objs[elm] == currentElement){
-                    attr_objs[elm].attr("text/text-decoration", "underline"); 
-                    elm_found = true;
-                    break;
-                }
-            }
-            if(!elm_found){
-                //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
-                toastr.error('Please click on the attribute you want to make as primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-            }
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make primary key.");
+        return;
+    }
+    
+    if(attr_objs.length == 1){
+        attr_objs[0].attr("text/text-decoration", "underline");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            attr_objs[elm].attr("text/text-decoration", "underline"); 
+            elm_found = true;
+            break;
         }
-
+    }
+    if(!elm_found){
+        //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
+        toastr.error('Please click on the attribute you want to make as primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
     }
 }
 function undo_primary_key(name_attr){
-    var attr_objs = find_attribute_object_by_name(name_attr);
-    var elm_found = false;
-    if(attr_objs != null){
-        if(attr_objs.length == 1){
-            attr_objs[0].attr("text/text-decoration", "none");
-        }else{
-            for(elm in attr_objs){
-                if(attr_objs[elm] == currentElement){
-                    attr_objs[elm].attr("text/text-decoration", "none"); 
-                    elm_found = true;
-                    break;
-                }
-            }
-            if(!elm_found){
-                //swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
-                toastr('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-            }
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo primary key.");
+        return;
+    }
+    if(attr_objs.length == 1){
+        attr_objs[0].attr("text/text-decoration", "none");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            attr_objs[elm].attr("text/text-decoration", "none"); 
+            elm_found = true;
+            break;
         }
-
+    }
+    if(!elm_found){
+        //swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
+        toastr('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
     }
 }
 
 function make_multi_valued(name_attr){
-    var attr_objs = find_attribute_object_by_name(name_attr);
-    var elm_found = false;
-    if(attr_objs != null){
-        if(attr_objs.length == 1){
-            makeAttributeMultivalued(attr_objs[0]);
-        }else{
-            for(elm in attr_objs){
-                if(attr_objs[elm] == currentElement){
-                    makeAttributeMultivalued(attr_obj[elm]);
-                    elm_found = true;
-                    break;
-                }
-            }
-            if(!elm_found){
-                //swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
-                toastr.error('Please click on the attribute you want to make multi valued and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\"");
-            }
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make multi valued.");
+        return;
+    }
+    if(attr_objs.length == 1){
+        makeAttributeMultivalued(attr_objs[0]);
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            makeAttributeMultivalued(attr_obj[elm]);
+            elm_found = true;
+            break;
         }
-
+    }
+    if(!elm_found){
+        //swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
+        toastr.error('Please click on the attribute you want to make multi valued and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\"");
     }
 }
 function undo_multi_valued(name_attr){
-    var attr_objs = find_attribute_object_by_name(name_attr);
-    var elm_found = false;
-    if(attr_objs != null){
-        if(attr_objs.length == 1){
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo multi valued.");
+        return; 
+    }
+    if(attr_objs.length == 1){
+        attr_objs[0].attr(".inner/display", "none");
+        attr_objs[0].attr(".outer/stroke", "#ffcb63");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
             attr_objs[0].attr(".inner/display", "none");
-            attr_objs[0].attr(".outer/stroke", "#ffcb63");
-        }else{
-            for(elm in attr_objs){
-                if(attr_objs[elm] == currentElement){
-                    attr_objs[0].attr(".inner/display", "none");
-                    attr_objs[0].attr(".outer/stroke", "#ffcb63"); 
-                    elm_found = true;
-                    break;
-                }
-            }
-            if(!elm_found){
-                //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
-                toastr.error('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-            }
+            attr_objs[0].attr(".outer/stroke", "#ffcb63"); 
+            elm_found = true;
+            break;
         }
-
+    }
+    if(!elm_found){
+        //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
+        toastr.error('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
     }
 }
 function rename_object(old_name, new_name){
-    var old_objects = find_object_by_name(old_name);
-    var elm_found = false;
-    if(old_objects != null){
-        if(old_objects.length == 1){
-            var obj = old_objects[0];
+    let old_objects = find_object_by_name(old_name);
+    let elm_found = false;
+    if(old_objects == null){
+        toastr.error('Please repeat your whole sentence!','Could not find element \"' + old_name +"\" to rename.");
+        return;
+    }
+    if(old_objects.length == 1){
+        let obj = old_objects[0];
+        obj.attr('text/text', new_name);
+        return;
+    }
+    for(elm in old_objects){
+        if(old_objects[elm] == currentElement){
+            let obj = old_objects[elm];
             obj.attr('text/text', new_name);
             elm_found = true;
-        }else{
-            for(elm in old_objects){
-                if(old_objects[elm] == currentElement){
-                    var obj = old_objects[elm];
-                    obj.attr('text/text', new_name);
-                    elm_found = true;
-                    break;
-                }
-            }
-            if(!elm_found){
-                //swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
-                toastr.error('There are multiple objects with the name \"' + old_name +"\".",'Please click on the object you want to rename and repeat your sentence!');
-            }
+            break;
         }
     }
-
+    if(!elm_found){
+        //swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
+        toastr.error('There are multiple objects with the name \"' + old_name +"\".",'Please click on the object you want to rename and repeat your sentence!');
+    }
+    
 }
 function delete_object(name_object){
-    var del_obj_list = find_object_by_name(name_object);
-    var found_elm = false;
+    let del_obj_list = find_object_by_name(name_object);
+    let found_elm = false;
     if(del_obj_list == null){
         //swal("There is no object called \"" + name_object + "\".", "Can't delete object!");
         toastr.error("Can't delete object!","There is no object called \"" + name_object + "\".");
@@ -474,9 +469,9 @@ function makeAttributeMultivalued(attr_obj){
     attr_obj.attr(".outer/stroke", "#797d9a");
 }
 function add_label_to_connection(name_entity_1, name_entity_2, val_number){
-    var ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    var ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    var rel_obj;
+    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
+    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
+    let rel_obj;
     list_relationships = ent_obj_1.attributes.relationship_object;
 
     for(rel in list_relationships){
@@ -485,20 +480,20 @@ function add_label_to_connection(name_entity_1, name_entity_2, val_number){
         }
     }
     if(get_elements_by_id(rel_obj.attributes.firstConnectionObject) == ent_obj_2){
-        var link_to_change_val  = get_links_by_id(rel_obj.attributes.firstConnectionLink);
-        var link = get_links_by_id(rel_obj.attributes.secondConnectionLink);
-        var updated_value = check_and_update_label(link, val_number);
+        let link_to_change_val  = get_links_by_id(rel_obj.attributes.firstConnectionLink);
+        let link = get_links_by_id(rel_obj.attributes.secondConnectionLink);
+        let updated_value = check_and_update_label(link, val_number);
         link_to_change_val.set(create_label(updated_value));
     }else{
-        var link_to_change_val = get_links_by_id(rel_obj.attributes.secondConnectionLink);
-        var link = get_links_by_id(rel_obj.attributes.firstConnectionLink);
-        var updated_value = check_and_update_label(link, val_number);
+        let link_to_change_val = get_links_by_id(rel_obj.attributes.secondConnectionLink);
+        let link = get_links_by_id(rel_obj.attributes.firstConnectionLink);
+        let updated_value = check_and_update_label(link, val_number);
         link_to_change_val.set(create_label(updated_value));
     }
 }
 
 function check_and_update_label(link, value_to_insert){
-   var value_label = link.attributes.labels[0].attrs.text.text;
+   let value_label = link.attributes.labels[0].attrs.text.text;
    if(value_to_insert == '1' && value_label == "M\n"){
         link.set(create_label("N"));
         return value_to_insert;
@@ -511,13 +506,13 @@ function check_and_update_label(link, value_to_insert){
 }
 
 function make_new_isa_connection(child_ent, parent_ent){
-    var isa = new class_buttons.ISA;
+    let isa = new class_buttons.ISA;
     isa.position(parent_ent.position().x + 40, parent_ent.position().y +45);
     graph.addCell(isa);
     isa_link = class_buttons.createLink(child_ent, isa);
     
     parent_ent.attributes.isParentEntity = true;
-    var inhertitance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
+    let inhertitance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
     
     parent_ent.attributes.inhertitanceConnectionsToChildren.push(inhertitance_connection_to_child);
 
@@ -525,9 +520,9 @@ function make_new_isa_connection(child_ent, parent_ent){
 }
 
 function change_isa_connections(child_ent){
-    var parent_ent = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[0]);
-    var isa = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[1]);
-    var isa_link = get_links_by_id(child_ent.attributes.inhertitanceConnectionToParent[2]);
+    let parent_ent = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[0]);
+    let isa = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[1]);
+    let isa_link = get_links_by_id(child_ent.attributes.inhertitanceConnectionToParent[2]);
     
     graph.removeCells(isa,isa_link);
     
@@ -540,7 +535,7 @@ function change_isa_connections(child_ent){
 }
 
 function remove_connection_from_child_list(elm, list){
-    var index = find_index_of_child_entity(elm,list);
+    let index = find_index_of_child_entity(elm,list);
     list.splice(index,1);
     return list;
 }

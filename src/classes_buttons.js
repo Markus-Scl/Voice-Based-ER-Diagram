@@ -1,8 +1,8 @@
-var joint = require('../node_modules/jointjs');
-var uniqid = require('../node_modules/uniqid');
+const joint = require('../node_modules/jointjs');
+const uniqid = require('../node_modules/uniqid');
 
-let user_id = uniqid();
-const do_log = true;
+const user_id = uniqid();
+const do_log = false;
 
 
 const ent_button = document.getElementById('ent_button');
@@ -70,7 +70,7 @@ async function load_file(){
     [fileHandle] = await window.showOpenFilePicker(pickerOpts);
     let fileData = await fileHandle.getFile();
     let json_string = await fileData.text();
-    var json_text = json_string.split('&&$$');
+    let json_text = json_string.split('&&$$');
     
     graph.clear();
 
@@ -81,11 +81,11 @@ async function load_file(){
 
 async function save(){
     let stream = await fileHandle.createWritable();
-    var all_objs = "";
-    var elementsList = graph.getElements();
+    let all_objs = "";
+    let elementsList = graph.getElements();
 
-    var linkList = graph.getLinks();
-    var all_links = "";
+    let linkList = graph.getLinks();
+    let all_links = "";
 
     for(i in elementsList){
         if(i == elementsList.length - 1){
@@ -108,7 +108,7 @@ async function save(){
             all_links += JSON.stringify(linkList[i]) + "&&$$";
         }
     }
-    var obj_plus_links = all_objs + all_links;
+    let obj_plus_links = all_objs + all_links;
 
 
     await stream.write(obj_plus_links);
@@ -122,11 +122,11 @@ async function save_file(){
 }
 
 
-var erd = joint.shapes.erd;
+const erd = joint.shapes.erd;
 
-var graph = new joint.dia.Graph();
+const graph = new joint.dia.Graph();
 
-var paper = new joint.dia.Paper({
+const paper = new joint.dia.Paper({
     el: document.getElementById('drawing-container'),
     width: '100%',
     height: '77%',
@@ -141,12 +141,12 @@ var paper = new joint.dia.Paper({
     },
 
     defaultConnectionPoint: function(line, view) {
-        var element = view.model;
+        let element = view.model;
         return element.getConnectionPoint(line.start) || element.getBBox().center();
     }
 });
 
-var highlighter = V('path', {
+let highlighter = V('path', {
     'stroke': '#FFF701',
     'stroke-width': '5px',
     'fill': 'transparent',
@@ -195,8 +195,8 @@ erd.Entity.prototype.getConnectionPoint = function(referencePoint) {
 
 erd.Relationship.prototype.getConnectionPoint = function(referencePoint) {
     // Intersection with a rhomb
-    var bbox = this.getBBox();
-    var line = new g.Line(bbox.center(), referencePoint);
+    let bbox = this.getBBox();
+    let line = new g.Line(bbox.center(), referencePoint);
     return (
         line.intersection(new g.Line(bbox.topMiddle(), bbox.leftMiddle())) ||
         line.intersection(new g.Line(bbox.leftMiddle(), bbox.bottomMiddle())) ||
@@ -208,8 +208,8 @@ erd.Relationship.prototype.getConnectionPoint = function(referencePoint) {
 
 erd.ISA.prototype.getConnectionPoint = function(referencePoint) {
     // Intersection with a triangle
-    var bbox = this.getBBox();
-    var line = new g.Line(bbox.center(), referencePoint);
+    let bbox = this.getBBox();
+    let line = new g.Line(bbox.center(), referencePoint);
     return (
         line.intersection(new g.Line(bbox.topMiddle(), bbox.bottomRight())) ||
         line.intersection(new g.Line(bbox.bottomRight(), bbox.bottomLeft())) ||
@@ -220,15 +220,15 @@ erd.ISA.prototype.getConnectionPoint = function(referencePoint) {
 function highlightElement(elm){
     currentElement = elm;
     
-    var padding = 5;
-    var bbox = elm.getBBox({ useModelGeometry: true }).inflate(padding);
+    let padding = 5;
+    let bbox = elm.getBBox({ useModelGeometry: true }).inflate(padding);
 
     highlighter.translate(bbox.x, bbox.y, { absolute: true });
     highlighter.attr('d', elm.getHighlighterPath(bbox.width, bbox.height));
 
     V(paper.viewport).append(highlighter);
 
-    var elementType = String(currentElement.attributes.type);
+    let elementType = String(currentElement.attributes.type);
 
     if(elementType.includes("Entity")){
         addOptionsToSelectIsA();
@@ -268,7 +268,7 @@ paper.on('element:pointerdown', function(cellView) {
 
 paper.on('element:pointermove', function(cellView) {
     highlightElement(cellView.model);
-    var elementType = String(currentElement.attributes.type);
+    let elementType = String(currentElement.attributes.type);
     if(elementType.includes("Entity")){
         if(currentElement.attributes.isParentEntity){
             updateIsaPosition();
@@ -284,14 +284,14 @@ paper.on('blank:pointerdown', function() {
 // Classes
 class Paper extends joint.dia.Paper {
     constructor(args = {}) {
-      var args_new = {
+      let args_new = {
            linkPinning: false,
            defaultConnectionPoint: function(line, view) {
-               var element = view.model;
+               let element = view.model;
                return element.getConnectionPoint(line.start) || element.getBBox().center();
            }
        }
-       for (var attrname in args) { args_new[attrname] = args[attrname]; }
+       for (let attrname in args) { args_new[attrname] = args[attrname]; }
        super(args_new);
    
     }
@@ -299,7 +299,7 @@ class Paper extends joint.dia.Paper {
 
 class Entity extends erd.Entity {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
             isParentEntity : false,
             inhertitanceConnectionToParent : [],
             inhertitanceConnectionsToChildren : [],
@@ -332,7 +332,7 @@ class Entity extends erd.Entity {
 
 class WeakEntity extends erd.WeakEntity {
     constructor(args = {}) {
-     var args_new = {
+    let args_new = {
     listChildren : [],
     position: { x: 530, y: 200 },
        size: {width: 100, height: 45},
@@ -363,7 +363,7 @@ class WeakEntity extends erd.WeakEntity {
 
 class IdentifyingRelationship extends erd.IdentifyingRelationship {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         position: { x: 350, y: 190 },
         attrs: {
             text: {
@@ -389,7 +389,7 @@ class IdentifyingRelationship extends erd.IdentifyingRelationship {
 
 class ISA extends erd.ISA {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         listChildren : [],
         position: { x: 160, y: 260 },
         attrs: {
@@ -415,7 +415,7 @@ class ISA extends erd.ISA {
 
 class Key extends erd.Key {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         position: { x: 10, y: 90 },
         attrs: {
             text: {
@@ -441,7 +441,7 @@ class Key extends erd.Key {
    
 class Attribute extends erd.Normal {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         listParent:[],
         listChildren : [],
         position: { x: 75, y: 30 },
@@ -465,7 +465,7 @@ class Attribute extends erd.Normal {
 
 class Multivalued extends erd.Multivalued {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         position: { x: 150, y: 90 },
         attrs: {
             text: {
@@ -494,7 +494,7 @@ class Multivalued extends erd.Multivalued {
 
 class Derived extends erd.Derived {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         position: { x: 440, y: 80 },
         attrs: {
             text: {
@@ -522,7 +522,7 @@ class Derived extends erd.Derived {
 
 class Relationship extends erd.Relationship {
     constructor(args = {}) {
-        var args_new = {
+        let args_new = {
         listChildren : [],
         firstConnectionObject: null,
         firstConnectionLink : null,
@@ -558,7 +558,7 @@ class Relationship extends erd.Relationship {
 //Helpers
 //Find Objects
 function get_elements_by_id(id){
-    var elementsList = graph.getElements();
+    let elementsList = graph.getElements();
     for(i in elementsList){
         if(elementsList[i].id == id){
             return elementsList[i];
@@ -567,7 +567,7 @@ function get_elements_by_id(id){
     return null;
 }
 function get_links_by_id(id){
-    var linksList = graph.getLinks();
+    let linksList = graph.getLinks();
     for(i in linksList){
         if(linksList[i].id == id){
             return linksList[i];
@@ -577,11 +577,11 @@ function get_links_by_id(id){
 }
 
 function findAllEntities(){
-    const elementsList = graph.getElements();
+    let elementsList = graph.getElements();
 
-    var onlyEntities = [];
+    let onlyEntities = [];
     for(elm in elementsList){
-        var elementType = String(elementsList[elm].attributes.type);
+        let elementType = String(elementsList[elm].attributes.type);
         if(elementType.includes("Entity")){
             onlyEntities.push(elementsList[elm]);
         }
@@ -600,9 +600,10 @@ function execute_ajax(user_id, action_on, action){
 }
 
 //Create Objects
-var createLink = function(elm1, elm2) {
+
+let createLink = function(elm1, elm2) {
     if(elm1 != null){
-        var myLink = new erd.Line({
+        let myLink = new erd.Line({
             markup: [
                 '<path class="connection" stroke="black" d="M 0 0 0 0"/>',
                 '<path class="connection-wrap" d="M 0 0 0 0"/>',
@@ -619,7 +620,7 @@ var createLink = function(elm1, elm2) {
 };
 
 function createEntityType(){
-    var ent_obj = new Entity();
+    let ent_obj = new Entity();
     ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
             Math.floor(Math.random() * (paper.getArea().height-65)));
     graph.addCell(ent_obj);
@@ -631,7 +632,7 @@ function createEntityType(){
 
 
 function createAttributType(){
-    var attr_obj = new Attribute();
+    let attr_obj = new Attribute();
     //Every attribute-type knows its parent entity-type
     attr_obj.attributes.listParent.push(currentElement.id);
 
@@ -651,7 +652,7 @@ function createAttributType(){
 }
 
 function createSubAttributType(){
-    var sub_attr_obj = new Attribute();
+    let sub_attr_obj = new Attribute();
     //Every sub attribute-type knows its parent attribute
     sub_attr_obj.attributes.listParent.push(currentElement.id);
     sub_attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
@@ -668,7 +669,7 @@ function createSubAttributType(){
 }
 
 function createRelationshipType(){
-    var rel_obj = new Relationship();
+    let rel_obj = new Relationship();
 
     rel_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
             Math.floor(Math.random() * (paper.getArea().height-65)));
@@ -680,28 +681,28 @@ function createRelationshipType(){
 }
 
 function writeTextInElement(){
-    var elementType = String(currentElement.attributes.type);
+    let elementType = String(currentElement.attributes.type);
     if(elementType.includes("Relationship")){
-        var msg = document.getElementById("rel_input").value;
+        let msg = document.getElementById("rel_input").value;
         currentElement.attr("text/text", msg); 
     }else if(elementType.includes("Entity")){
-        var msg = document.getElementById("ent_input").value;
+        let msg = document.getElementById("ent_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1));
     }else if(elementType.includes("Normal")){
-        var msg = document.getElementById("attr_input").value;
+        let msg = document.getElementById("attr_input").value;
         currentElement.attr("text/text", msg.charAt(0).toUpperCase() + msg.slice(1)); 
     } 
 }
 
 //Global dictionary of current entity-type names as key and the object as value
-var storedEntities = {};
+let storedEntities = {};
 
 function addOptionsToSelect(){
     storedEntities = [];
-    var allEntities = findAllEntities();
+    let allEntities = findAllEntities();
     
-    var optionsContainer1 = document.getElementById("select1");
-    var optionsContainer2 = document.getElementById("select3");
+    let optionsContainer1 = document.getElementById("select1");
+    let optionsContainer2 = document.getElementById("select3");
     //Delete all previous stored options
     while(optionsContainer1.length > 1){
         optionsContainer1.remove(1);
@@ -709,13 +710,13 @@ function addOptionsToSelect(){
     }
     //Add all entity-type names to select
     for(ent in allEntities){
-        var option1 = document.createElement("option");
+        let option1 = document.createElement("option");
         option1.value = allEntities[ent].attr("text/text");
         option1.text = allEntities[ent].attr("text/text");
 
         storedEntities[allEntities[ent].attr("text/text")] = allEntities[ent];
         
-        var option2 = document.createElement("option");
+        let option2 = document.createElement("option");
         option2.value = allEntities[ent].attr("text/text");
         option2.text = allEntities[ent].attr("text/text");
         
@@ -726,14 +727,14 @@ function addOptionsToSelect(){
 
 function createRelationshipOne(){
     //Get text of the selected value in dropdown-list
-    var selectValue = document.getElementById("select1").value;
+    let selectValue = document.getElementById("select1").value;
     //Get the Entity-Object, which has to be connected with the relationsship
-    var connectionObject = storedEntities[selectValue];
+    let connectionObject = storedEntities[selectValue];
 
     //Get current connection and connected Entity of the relationship
-    var currentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    var currentObject = get_elements_by_id(currentElement.attributes.firstConnectionObject);
-    var firstLink;
+    let currentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    let currentObject = get_elements_by_id(currentElement.attributes.firstConnectionObject);
+    let firstLink;
     //Current connection has changed
     if(currentObject != null  && currentObject != connectionObject){
         graph.removeCells(currentLink);
@@ -756,14 +757,14 @@ function createRelationshipOne(){
 }
 function createRelationshipTwo(){
     //Get text of the selected value in dropdown-list
-    var selectValue = document.getElementById("select3").value;
+    let selectValue = document.getElementById("select3").value;
     //Get the Entity-Object, which has to be connected with the relationsship
-    var connectionObject = storedEntities[selectValue];
+    let connectionObject = storedEntities[selectValue];
 
     //Get current connection and connected Entity of the relationship
-    var currentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
-    var currentObject = get_elements_by_id(currentElement.attributes.secondConnectionObject);
-    var secondLink;
+    let currentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let currentObject = get_elements_by_id(currentElement.attributes.secondConnectionObject);
+    let secondLink;
     //Current connection has changed
     if(currentObject != null  && currentObject != connectionObject){
         graph.removeCells(currentLink);
@@ -784,7 +785,7 @@ function createRelationshipTwo(){
     }
 }
 
-var createLabel = function(txt) {
+let createLabel = function(txt) {
     return {
         labels: [{
             position: 0.3,
@@ -797,8 +798,8 @@ var createLabel = function(txt) {
 };
 
 function addLabelToConnectionOne(){
-    var selectValue = document.getElementById("select2").value;
-    var currentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    let selectValue = document.getElementById("select2").value;
+    let currentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
     currentLink.set(createLabel(selectValue));
     updateLabelsOfConnection();
     if(do_log){
@@ -807,8 +808,8 @@ function addLabelToConnectionOne(){
 }
 
 function addLabelToConnectionTwo(){
-    var selectValue = document.getElementById("select4").value;
-    var currentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let selectValue = document.getElementById("select4").value;
+    let currentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
     currentLink.set(createLabel(selectValue));
     updateLabelsOfConnection();
     if(do_log){
@@ -818,19 +819,19 @@ function addLabelToConnectionTwo(){
 
 function updateLabelsOfConnection(){
 
-    var firstCurrentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    var secondCurrentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let firstCurrentLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    let secondCurrentLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
 
     if(secondCurrentLink != null){
-        var valueFirstLabel = firstCurrentLink.attributes.labels[0].attrs.text.text;
-        var valueSecondLabel = secondCurrentLink.attributes.labels[0].attrs.text.text;
+        let valueFirstLabel = firstCurrentLink.attributes.labels[0].attrs.text.text;
+        let valueSecondLabel = secondCurrentLink.attributes.labels[0].attrs.text.text;
 
         if(valueFirstLabel != "1\n" && valueSecondLabel != "1\n"){
             
             valueSecondLabel = "M";
             secondCurrentLink.set(createLabel(valueSecondLabel));
 
-            var dropdownListVal = document.getElementById("select4").value;
+            let dropdownListVal = document.getElementById("select4").value;
             if(dropdownListVal != "M"){
                 updateValueLableDropdownListToValue_M();
                 document.getElementById("select4").value = "M";
@@ -840,14 +841,14 @@ function updateLabelsOfConnection(){
             valueSecondLabel = "N";
             secondCurrentLink.set(createLabel(valueSecondLabel));
 
-            var dropdownListVal = document.getElementById("select4").value;
+            let dropdownListVal = document.getElementById("select4").value;
             if(dropdownListVal != "N"){
                 updateValueLableDropdownListToValue_N();
                 document.getElementById("select4").value = "N";
             }
         }else if (valueFirstLabel != "1\n" && valueSecondLabel == "1\n"){
 
-            var dropdownListVal = document.getElementById("select4").value;
+            let dropdownListVal = document.getElementById("select4").value;
             if(dropdownListVal != "M"){
                 updateValueLableDropdownListToValue_M();
                 document.getElementById("select4").value = "1";
@@ -855,13 +856,13 @@ function updateLabelsOfConnection(){
             
         }else{
 
-            var dropdownListVal = document.getElementById("select4").value;
+            let dropdownListVal = document.getElementById("select4").value;
             if(dropdownListVal != "N"){
                 updateValueLableDropdownListToValue_N();
             }
         }
     }else{
-        var valueFirstLabel = firstCurrentLink.attributes.labels[0].attrs.text.text;
+        let valueFirstLabel = firstCurrentLink.attributes.labels[0].attrs.text.text;
         if(valueFirstLabel != "1\n"){
             updateValueLableDropdownListToValue_M();
         }
@@ -869,8 +870,8 @@ function updateLabelsOfConnection(){
 }
 
 function updateValueLableDropdownListToValue_M(){
-    var dropdownList = document.getElementById("select4");
-    var option = document.createElement("option");
+    let dropdownList = document.getElementById("select4");
+    let option = document.createElement("option");
     option.value = "M";
     option.text = "M";
 
@@ -879,8 +880,8 @@ function updateValueLableDropdownListToValue_M(){
 
 }
 function updateValueLableDropdownListToValue_N(){
-    var dropdownList = document.getElementById("select4");
-    var option = document.createElement("option");
+    let dropdownList = document.getElementById("select4");
+    let option = document.createElement("option");
     option.value = "N";
     option.text = "N";
 
@@ -892,32 +893,32 @@ function updateValueLableDropdownListToValue_N(){
 function initializeSelectValues(){
 
     if(get_elements_by_id(currentElement.attributes.firstConnectionObject) != null){
-        var firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
+        let firstConnectionObjectName = get_elements_by_id(currentElement.attributes.firstConnectionObject).attributes.attrs.text.text;
         document.getElementById("select1").value = firstConnectionObjectName;
     }
     if(get_links_by_id(currentElement.attributes.firstConnectionLink) != null){
-        var firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
+        let firstLinkLabelName = get_links_by_id(currentElement.attributes.firstConnectionLink).attributes.labels[0].attrs.text.text;
         firstLinkLabelName = firstLinkLabelName.trim();
         $("#select2").val(firstLinkLabelName);
     }
     if(get_elements_by_id(currentElement.attributes.secondConnectionObject) != null){
-        var secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
+        let secondConnectionObjectName = get_elements_by_id(currentElement.attributes.secondConnectionObject).attributes.attrs.text.text;
         document.getElementById("select3").value = secondConnectionObjectName;
     }
     if(get_links_by_id(currentElement.attributes.secondConnectionLink) != null){
-        var secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
+        let secondLinkLabelName = get_links_by_id(currentElement.attributes.secondConnectionLink).attributes.labels[0].attrs.text.text;
         secondLinkLabelName = secondLinkLabelName.trim();
         $("#select4").val(secondLinkLabelName);
     }
 }
 
 function deleteElement(elm){
-    var type = String(elm.type);
+    let type = String(elm.type);
     if(type.includes("click")){
         elm = currentElement;
     }
     if(currentElement != null){
-        var elementType = String(elm.attributes.type);
+        let elementType = String(elm.attributes.type);
         //Delete Entity and all it's children attributes
         if(elementType.includes("Entity")){
             if(do_log){
@@ -944,13 +945,13 @@ function deleteElement(elm){
 
 function deleteAttribute(elm){
     //Get the duplicate of the list, else you change dinamically the list you iterate through --> don't deletes every node
-    var listAllChildren = elm.attributes.listChildren.slice();
+    let listAllChildren = elm.attributes.listChildren.slice();
 
-    var parent = get_elements_by_id(elm.attributes.listParent[0]);
-    var parentChildList = parent.attributes.listChildren;
+    let parent = get_elements_by_id(elm.attributes.listParent[0]);
+    let parentChildList = parent.attributes.listChildren;
 
     //Find index of attribute in the entity-types child list
-    var index = findIndexInList(elm, parentChildList);
+    let index = findIndexInList(elm, parentChildList);
     //Delete childnode from list of the parent
     parentChildList.splice(index,1);
     
@@ -963,7 +964,7 @@ function deleteAttribute(elm){
 }
 
 function deleteEntity(elm){
-    var isaParentEntity = elm.attributes.isParentEntity;
+    let isaParentEntity = elm.attributes.isParentEntity;
     //This is a Parent-Entity (other entity-types inherit), and doesn't inherit from other entity-type. Have to remove all connections to its children and the information of ConnectionToParent in chihldnode (entity-type)
     if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length == 0){
         removeChildrenInheritance(elm);
@@ -980,29 +981,29 @@ function deleteEntity(elm){
     }
     //Delete all of the entity-types children(attributes)
     //Get the duplicate of the list, else you change dinamically the list you iterat threw --> doesn't delete every node
-    var listAllChildren = elm.attributes.listChildren.slice();  
+    let listAllChildren = elm.attributes.listChildren.slice();  
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
     }
 }
 //Helper function for deleteEntity()
 function removeChildrenInheritance(elm){
-    var childList = elm.attributes.inhertitanceConnectionsToChildren;
+    let childList = elm.attributes.inhertitanceConnectionsToChildren;
     for(childConnection in childList){
-        var child = get_elements_by_id(childList[childConnection][0]);
+        let child = get_elements_by_id(childList[childConnection][0]);
         //Delete informatin about its parent entity-type
         child.attributes.inhertitanceConnectionToParent = [];
-        var isa = get_elements_by_id(childList[childConnection][1]);
-        var isaLink = get_links_by_id(childList[childConnection][2]);
+        let isa = get_elements_by_id(childList[childConnection][1]);
+        let isaLink = get_links_by_id(childList[childConnection][2]);
         graph.removeCells(isa, isaLink);
     }
 }
 //Helper function to deletEntity()
 function removeParentInheritance(elm){
-    var parent = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[0]);
-    var isa = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[1]);
-    var isaLink = get_links_by_id(elm.attributes.inhertitanceConnectionToParent[2]);
-    var childListOfParent = parent.attributes.inhertitanceConnectionsToChildren;
+    let parent = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[0]);
+    let isa = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[1]);
+    let isaLink = get_links_by_id(elm.attributes.inhertitanceConnectionToParent[2]);
+    let childListOfParent = parent.attributes.inhertitanceConnectionsToChildren;
 
     //Delete information about child entity-type in parent
     childListOfParent = removeConnectionFromChildlist(elm, childListOfParent);
@@ -1013,7 +1014,7 @@ function removeParentInheritance(elm){
 }
 
 function removeConnectionFromChildlist(elm, list){
-    var index = findIndexOfChildEntity(elm,list);
+    let index = findIndexOfChildEntity(elm,list);
     list.splice(index,1);
     return list;
 }
@@ -1029,7 +1030,7 @@ function findIndexOfChildEntity(elm, listOfLists){
     }
 }
 function findIndexInList(elm, list){
-    var index = 0;
+    let index = 0;
     for(item in list){
         if(get_elements_by_id(list[item]) == elm){
             return index;
@@ -1040,13 +1041,13 @@ function findIndexInList(elm, list){
 }
 
 function deleteRelationship(elm){
-    var firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    var secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
+    let secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
 
     graph.removeCells(firstLink);
     graph.removeCells(secondLink);
 
-    var listAllChildren = elm.attributes.listChildren.slice();  
+    let listAllChildren = elm.attributes.listChildren.slice();  
     for (child in listAllChildren){
         deleteElement(get_elements_by_id(listAllChildren[child]));
     }
@@ -1054,8 +1055,8 @@ function deleteRelationship(elm){
 
 
 function actionOnAttributeForMultivalued(){
-    var checkbox1 = document.getElementById("checkbox1");
-    var checkbox2 = document.getElementById("checkbox2");
+    let checkbox1 = document.getElementById("checkbox1");
+    let checkbox2 = document.getElementById("checkbox2");
     if(checkbox1.checked){
         checkbox1.checked = false;
         //function to uncheck primarykey
@@ -1069,8 +1070,8 @@ function actionOnAttributeForMultivalued(){
 }
 
 function actionOnAttributeForPrimaryKey(){
-    var checkbox1 = document.getElementById("checkbox1");
-    var checkbox2 = document.getElementById("checkbox2");
+    let checkbox1 = document.getElementById("checkbox1");
+    let checkbox2 = document.getElementById("checkbox2");
 
     if(checkbox2.checked){
         checkbox2.checked = false;
@@ -1114,19 +1115,19 @@ function undoPrimaryKey(){
     }
 }
 
-var storedEntitiesISA = [];
+let storedEntitiesISA = [];
 function addOptionsToSelectIsA(){
     storedEntitiesISA = [];
-    var allEntities = findAllEntities();
+    let allEntities = findAllEntities();
     
-    var optionsContainer1 = document.getElementById("ISA-Select");
+    let optionsContainer1 = document.getElementById("ISA-Select");
 
     while(optionsContainer1.length > 1){
         optionsContainer1.remove(1);
     }
     for(ent in allEntities){
         if(allEntities[ent].attr("text/text") != currentElement.attr("text/text")){
-            var option1 = document.createElement("option");
+            let option1 = document.createElement("option");
             option1.value = allEntities[ent].attr("text/text");
             option1.text = allEntities[ent].attr("text/text");
     
@@ -1137,9 +1138,9 @@ function addOptionsToSelectIsA(){
 }
 
 function createISA(){
-    var selectValue = document.getElementById("ISA-Select").value;
+    let selectValue = document.getElementById("ISA-Select").value;
     //Get the Entity-Object, which has to be connected with the relationsship
-    var connectionObject = storedEntitiesISA[selectValue];
+    let connectionObject = storedEntitiesISA[selectValue];
     if(currentElement.attributes.inhertitanceConnectionToParent.length == 0){
         makeNewIsaConnection(currentElement, connectionObject);
     // Entity is alreday inherited, but user select to undo the inheritance
@@ -1156,13 +1157,13 @@ function createISA(){
 }
 
 function makeNewIsaConnection(currElement, parentElement){
-    var isa = new ISA();
+    let isa = new ISA();
     isa.position(parentElement.position().x + 40, parentElement.position().y +45);
     graph.addCell(isa);
     isaLink = createLink(currElement, isa);
     
     parentElement.attributes.isParentEntity = true;
-    var inhertitanceConnectionToChild = [currElement.id,isa.id,isaLink.id];
+    let inhertitanceConnectionToChild = [currElement.id,isa.id,isaLink.id];
     
     parentElement.attributes.inhertitanceConnectionsToChildren.push(inhertitanceConnectionToChild);
 
@@ -1170,9 +1171,9 @@ function makeNewIsaConnection(currElement, parentElement){
 }
 
 function changeIsaConnections(currElement){
-    var parent = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[0]);
-    var isa = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[1]);
-    var isaLink = get_links_by_id(currElement.attributes.inhertitanceConnectionToParent[2]);
+    let parent = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[0]);
+    let isa = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[1]);
+    let isaLink = get_links_by_id(currElement.attributes.inhertitanceConnectionToParent[2]);
     
     graph.removeCells(isa,isaLink);
     
@@ -1185,17 +1186,17 @@ function changeIsaConnections(currElement){
 }
 
 function updateIsaPosition(){
-    var childrenList = currentElement.attributes.inhertitanceConnectionsToChildren;
+    let childrenList = currentElement.attributes.inhertitanceConnectionsToChildren;
     if(childrenList.length > 0){
         for(child in childrenList){
-            var isa = get_elements_by_id(childrenList[child][1]);
+            let isa = get_elements_by_id(childrenList[child][1]);
             isa.position(currentElement.position().x + 40, currentElement.position().y + 45);
         }
     }
 }
 
 function updateIsaSelect(){
-    var parentConnection = currentElement.attributes.inhertitanceConnectionToParent;
+    let parentConnection = currentElement.attributes.inhertitanceConnectionToParent;
     if(parentConnection.length > 0){
         document.getElementById("ISA-Select").value = get_elements_by_id(parentConnection[0]).attributes.attrs.text.text;
     }
