@@ -8,7 +8,7 @@ const regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)
 const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
-const regex_find_number_relationship = [/(one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/];
+const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
 const regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
@@ -22,6 +22,7 @@ dict_replace['8'] = "create";
 dict_replace['3 8'] = "create";
 dict_replace['3/8'] = "create";
 dict_replace['a tribute'] = "attribute";
+dict_replace[' s '] = "as";
 
 function replace_common_mistakes(input, dict){
     for(let key in dict){
@@ -165,27 +166,13 @@ function find_relationship_number(input){
     for(let i = 0; i < regex_find_number_relationship.length; i++){
         regex_find_number_relationship[i].lastIndex = 0;
         while(match = regex_find_number_relationship[i].exec(sentence_preprocessed)){
-            regex_find_number_relationship[i].lastIndex = 0;
-            let number1 = match[1];
-            let entity1 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
-            let number2 = match[3];
-            let entity2 = match[4].charAt(0).toUpperCase() + match[4].slice(1);
-            if(['one', '1', 'a'].includes(number1)){
-                number1 = '1';
-            } else if(['many', 'several', 'multiple', 'a lot of', 'n', 'm'].includes(number1)){
-                number1 = 'N';
-            }else{
-                //console.log("What are the numbers for the relationship?");
-                if(class_buttons.do_log){
-                    execute_ajax_error(class_buttons.user_id, "Couldn't identify numbers for relationship!", input);
-                }
-                return null;
-            }
-
-            if(['one', '1', 'a'].includes(number2)){
-                number2 = '1';
-            } else if(['many', 'several', 'multiple', 'a lot of', 'n', 'm'].includes(number2)){
-                number2 = 'N';
+            let entity1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            let number = match[2];
+            let entity2 = match[3].charAt(0).toUpperCase() + match[3].slice(1);
+            if(['one', '1', 'a'].includes(number)){
+                number = '1';
+            } else if(['many', 'several', 'multiple', 'a lot of', 'n', 'm'].includes(number)){
+                number = 'N';
             }else{
                 //console.log("What are the numbers for the relationship?");
                 if(class_buttons.do_log){
@@ -195,7 +182,7 @@ function find_relationship_number(input){
             }
 
             if(check_if_noun(entity1) && check_if_noun(entity2)){
-                return [number1, entity1, number2, entity2]; 
+                return [entity1, number, entity2]; 
             }else{
                 if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't identify entity-types for adding relationship numbers!", input);
@@ -397,11 +384,12 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create') != -1 || input.indexOf('insert') != -1 || input.indexOf('draw') != -1 || input.indexOf('paint') != -1){
+    if(input.indexOf('create') != -1 || input.indexOf('insert') != -1 || input.indexOf('draw') != -1 || input.indexOf('paint') != -1 || input.indexOf('add') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
-            let param = find_entity_names(input,false);
+            let find_entity_for_rel = false;
+            let param = find_entity_names(input,find_entity_for_rel);
             //console.log('Name of Entity: ' + param[0]);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create entity-type", input);
@@ -413,7 +401,8 @@ function execute_speech(input){
             let param_attribute = find_attribute_name(input);
             let param_entity = null;
             if(param_attribute != null){
-                param_entity = find_entity_names(input,false);
+                let find_entity_for_rel = false;
+                param_entity = find_entity_names(input,find_entity_for_rel);
             }
             //Create multi valued attribute
             if(input.indexOf('multi valued') != -1){
@@ -447,7 +436,8 @@ function execute_speech(input){
         }else if(input.indexOf('entity') == -1 && input.indexOf('sub attribute') != -1){
             let param_sub_attribute = find_sub_attribute_name(input);
             let param_attribute = find_attribute_name(input);
-            let param_entity = find_entity_names(input,false);
+            let find_entity_for_rel = false;
+            let param_entity = find_entity_names(input,find_entity_for_rel);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create sub attribute-type", input);
             }
@@ -460,7 +450,8 @@ function execute_speech(input){
         }else if(input.indexOf('relationship') != -1 && input.indexOf('attribute') == -1){
             //console.log('Relationship will be created');
             let param_relationship = find_relationship_name(input);
-            let param_entities = find_entity_names(input, true);
+            let find_entity_for_rel = true;
+            let param_entities = find_entity_names(input, find_entity_for_rel);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create relationship-type", input);
             }
@@ -492,16 +483,15 @@ function execute_speech(input){
             execute_ajax(class_buttons.user_id, "Update numbers for relationsship-type", input);
         }
         let param_relation_numbers = find_relationship_number(input);
+
         if(param_relation_numbers != null){
-            if(param_relation_numbers[0] == "N" && param_relation_numbers[2] == "N"){
-                param_relation_numbers[2] = "M";
-            }
+            let entity_1 = param_relation_numbers[0];
+            let number = param_relation_numbers[1];
+            let entity_2 = param_relation_numbers[2];
+            classes.add_label_to_connection(entity_1, number, entity_2);
+        }else{
+            console.log("not found");
         }
-        /*console.log("Number 1: " + param_relation_numbers[0]);
-        console.log("Entity 1: " + param_relation_numbers[1]);
-        console.log("Number 2: " + param_relation_numbers[2]);
-        console.log("Entity 2: " + param_relation_numbers[3]);*/
-        classes.add_label_to_connection(param_relation_numbers[1], param_relation_numbers[3], param_relation_numbers[2]);
     //Update objects (change name)
     }else if(input.indexOf('update') != -1 || input.indexOf('change') != -1 || input.indexOf('rename') != -1){
         //console.log('update');

@@ -468,11 +468,11 @@ function makeAttributeMultivalued(attr_obj){
     attr_obj.attr(".inner/stroke", "#797d9a");
     attr_obj.attr(".outer/stroke", "#797d9a");
 }
-function add_label_to_connection(name_entity_1, name_entity_2, val_number){
+function add_label_to_connection(name_entity_1, val_number, name_entity_2){
     let ent_obj_1 = find_entity_object_by_name(name_entity_1);
     let ent_obj_2 = find_entity_object_by_name(name_entity_2);
     let rel_obj;
-    list_relationships = ent_obj_1.attributes.relationship_object;
+    let list_relationships = ent_obj_1.attributes.relationship_object;
 
     for(rel in list_relationships){
         if(get_elements_by_id(list_relationships[rel][2]) == ent_obj_2){

@@ -750,10 +750,24 @@ function createRelationshipOne(){
     firstLink.set(createLabel("1"));
     currentElement.attributes.firstConnectionLink = firstLink.id;
     currentElement.attributes.firstConnectionObject = connectionObject.id;
+    writeWholeRelationshipInEntityFromRelOne(currentElement, connectionObject);
     if(do_log){
         execute_ajax(user_id,"On Select Value", "Create Relationship-One for " + selectValue);
     }
-
+}
+function writeWholeRelationshipInEntityFromRelOne(rel_obj, first_con_obj){
+    if(rel_obj.attributes.secondConnectionObject != null){
+        let second_con_obj = get_elements_by_id(rel_obj.attributes.secondConnectionObject);
+        first_con_obj.attributes.relationship_object.push([first_con_obj.id, rel_obj.id, second_con_obj.id]);
+        second_con_obj.attributes.relationship_object.push([second_con_obj.id, rel_obj.id, first_con_obj.id]);
+    }
+}
+function writeWholeRelationshipInEntityFromRelTwo(rel_obj, second_con_obj){
+    if(rel_obj.attributes.firstConnectionObject != null){
+        let first_con_obj = get_elements_by_id(rel_obj.attributes.firstConnectionObject);
+        first_con_obj.attributes.relationship_object.push([first_con_obj.id, rel_obj.id, second_con_obj.id]);
+        second_con_obj.attributes.relationship_object.push([second_con_obj.id, rel_obj.id, first_con_obj.id]);
+    }
 }
 function createRelationshipTwo(){
     //Get text of the selected value in dropdown-list
@@ -780,6 +794,7 @@ function createRelationshipTwo(){
     secondLink.set(createLabel("1"));
     currentElement.attributes.secondConnectionObject = connectionObject.id;
     currentElement.attributes.secondConnectionLink = secondLink.id;
+    writeWholeRelationshipInEntityFromRelTwo(currentElement, connectionObject);
     if(do_log){
         execute_ajax(user_id,"On Select Value", "Create Relationship-Two for " + selectValue);
     }
