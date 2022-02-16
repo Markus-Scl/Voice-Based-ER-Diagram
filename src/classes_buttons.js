@@ -269,15 +269,12 @@ paper.on('element:pointerdown', function(cellView) {
 paper.on('element:pointermove', function(cellView) {
     highlightElement(cellView.model);
     let elementType = String(currentElement.attributes.type);
-    if(elementType.includes("Entity")){
-        if(currentElement.attributes.isParentEntity){
-            updateIsaPosition();
-        }
+    if(elementType.includes("Entity") && currentElement.attributes.isParentEntity){
+            updateIsaPosition();   
     }
 });
 
 paper.on('blank:pointerdown', function() {
-
     highlighter.remove();
 });
 

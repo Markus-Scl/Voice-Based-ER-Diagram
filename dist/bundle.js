@@ -33492,15 +33492,12 @@ paper.on('element:pointerdown', function(cellView) {
 paper.on('element:pointermove', function(cellView) {
     highlightElement(cellView.model);
     let elementType = String(currentElement.attributes.type);
-    if(elementType.includes("Entity")){
-        if(currentElement.attributes.isParentEntity){
-            updateIsaPosition();
-        }
+    if(elementType.includes("Entity") && currentElement.attributes.isParentEntity){
+            updateIsaPosition();   
     }
 });
 
 paper.on('blank:pointerdown', function() {
-
     highlighter.remove();
 });
 
@@ -34468,15 +34465,16 @@ const class_buttons = require('./classes_buttons');
 
 
 const regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,];
-const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+//const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
-const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
 const regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
 const regex_find_undo = [/undo (?:primary key|multi valued|multi-valued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
-const regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? ([a-z]+) is (?:primary key|multi valued|multi-valued)/g];
+const regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? is (?:primary key|multi valued|multi-valued)/g];
 const regex_noun = /nn.*/;
 
 const dict_replace = {};
@@ -34532,9 +34530,11 @@ function find_do_name(input){
         regex_find_do[i].lastIndex = 0;
         while(match = regex_find_do[i].exec(sentence_preprocessed)){
             let name_do = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-            if(check_if_noun(name_do)){
+            console.log(name_do);
+            return name_do;
+            /*if(check_if_noun(name_do)){
                 return name_do;
-            }
+            }*/
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
@@ -34558,9 +34558,10 @@ function find_undo_name(input){
         regex_find_undo[i].lastIndex = 0;
         while(match = regex_find_undo[i].exec(sentence_preprocessed)){
             let name_undo = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-            if(check_if_noun(name_undo)){
+            return name_undo;
+            /*if(check_if_noun(name_undo)){
                 return name_undo;
-            }
+            }*/
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
@@ -34578,6 +34579,7 @@ function find_undo_name(input){
     }
     return null;
 }
+
 function find_rename_obj(input){
     let sentence_preprocessed = preprocess_sentence(input);
     for(let i = 0; i < regex_find_update_names.length; i++){
@@ -34634,8 +34636,10 @@ function find_relationship_number(input){
             let entity2 = match[3].charAt(0).toUpperCase() + match[3].slice(1);
             if(['one', '1', 'a'].includes(number)){
                 number = '1';
+                return [entity1, number, entity2]; 
             } else if(['many', 'several', 'multiple', 'a lot of', 'n', 'm'].includes(number)){
                 number = 'N';
+                return [entity1, number, entity2]; 
             }else{
                 //console.log("What are the numbers for the relationship?");
                 if(class_buttons.do_log){
@@ -34643,8 +34647,7 @@ function find_relationship_number(input){
                 }
                 return null;
             }
-
-            if(check_if_noun(entity1) && check_if_noun(entity2)){
+            /*if(check_if_noun(entity1) && check_if_noun(entity2)){
                 return [entity1, number, entity2]; 
             }else{
                 if(class_buttons.do_log){
@@ -34654,11 +34657,11 @@ function find_relationship_number(input){
                 //classes.swal_to_user("What are the names of the entity-types for updating number of relationship?", "Pleas repeat your whole sentence!")
                 toastr.error("Pleas repeat your whole sentence!","What are the names of the entity-types for updating number of relationship?");
                 return null;
-            }
+            }*/
         }
     }
     if(class_buttons.do_log){
-        execute_ajax_error(class_buttons.user_id, "Couldn't find numbers for relationship!", input);
+        execute_ajax_error(class_buttons.user_id, "Couldn't find numbers for relationship or entity names!", input);
     }
     //console.log("What are the numbers for the relationship?");
     //classes.swal_to_user("What are the numbers for the relationship?", "Pleas repeat your whole sentence!")
@@ -34696,17 +34699,17 @@ function find_attribute_name(input){
     for(let i = 0; i < regex_find_attributes.length; i++){
         regex_find_attributes[i].lastIndex = 0;
         while(match = regex_find_attributes[i].exec(sentence_preprocessed)){
-            if(check_if_noun(match[1])){
+            //if(check_if_noun(match[1])){
                 attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return attribute_name;
-            }else{
+            /*}else{
                 if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribut-type! Is not a noun!", input);
                 }
                 //classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
                 toastr.error("Please rephrase and repeat your sentence!","Name of attribute isn't a noun!");
                 return null;
-            }
+            }*/
         }
     }
     if(class_buttons.do_log){
@@ -34722,16 +34725,16 @@ function find_sub_attribute_name(input){
     for(let i = 0; i < regex_find_sub_attribute.length; i++){
         regex_find_sub_attribute[i].lastIndex = 0;
         while(match = regex_find_sub_attribute[i].exec(sentence_preprocessed)){
-            if(check_if_noun(match[1])){
+            //if(check_if_noun(match[1])){
                 let sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 return sub_attribute_name;
-            }else{
+            /*}else{
                 if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't find name of sub-attribute type! Must be a noun!", input);
                 }
                 //classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
                 toastr.error("Please repeat in a whole sentence?","Name of sub attribute must be a noun!");
-            }
+            }*/
         }
     }
     if(class_buttons.do_log){
@@ -34748,23 +34751,23 @@ function find_entity_names(input, bool_for_rel){
         regex_find_entities[i].lastIndex = 0;
         while(match = regex_find_entities[i].exec(sentence_preprocessed)){
             if(match.length == 3){
-                if(check_if_noun(match[1]) && check_if_noun(match[2])){
+                //if(check_if_noun(match[1]) && check_if_noun(match[2])){
                     entity_name1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                     entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
                     list_entity_names.push(entity_name1);
                     list_entity_names.push(entity_name2);
-                }else{
+                /*}else{
                     if(class_buttons.do_log){
                         execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-types for creating relationsship! Entity-type names must be a noun!", input);
                     }
                     //classes.swal_to_user("What is the name of the entity types for the relationship?",null)
                     toastr.error("","What is the name of the entity types for the relationship?");
-                }
+                }*/
             }else{
-                if(check_if_noun(match[1])){
+                //if(check_if_noun(match[1])){
                     entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                     list_entity_names.push(entity_name);
-                }else{
+                /*}else{
                     if(class_buttons.do_log){
                         execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-type! Entity-type name must be a noun!", input);
                     }
@@ -34772,7 +34775,7 @@ function find_entity_names(input, bool_for_rel){
                     toastr.error("","Name of entity must be a noun?");
                     list_entity_names.push(null);
                     return list_entity_names;
-                }
+                }*/
             }
         }
 
@@ -34801,12 +34804,13 @@ function find_entities_for_isa(input){
     for(let i = 0; i < regex_find_isa.length; i++){
         regex_find_isa[i].lastIndex = 0;
         while(match = regex_find_isa[i].exec(sentence_preprocessed)){
-            if(check_if_noun(match[1]) && check_if_noun(match[2])){
+            //if(check_if_noun(match[1]) && check_if_noun(match[2])){
                 entity_name1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
                 list_entity_names.push(entity_name1);
                 list_entity_names.push(entity_name2);
-            }else{
+                return list_entity_names;
+            /*}else{
                 if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type! Names must be a noun!", input);
                 }
@@ -34814,7 +34818,7 @@ function find_entities_for_isa(input){
                 toastr.error("","What are the names of the entity types for isa type? Names of entity-types must be a noun!");
                 list_entity_names.push(null);
                 return list_entity_names;
-            }
+            }*/
         }
     }
     if(class_buttons.do_log){
@@ -34847,7 +34851,7 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create') != -1 || input.indexOf('insert') != -1 || input.indexOf('draw') != -1 || input.indexOf('paint') != -1 || input.indexOf('add') != -1){
+    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
@@ -34951,6 +34955,7 @@ function execute_speech(input){
             let entity_1 = param_relation_numbers[0];
             let number = param_relation_numbers[1];
             let entity_2 = param_relation_numbers[2];
+
             classes.add_label_to_connection(entity_1, number, entity_2);
         }else{
             console.log("not found");
