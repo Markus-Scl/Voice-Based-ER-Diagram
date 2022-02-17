@@ -32801,6 +32801,14 @@ function get_links_by_id(id){
 function create_isa_type(name_child, name_parent){
     let child_ent = find_entity_object_by_name(name_child);
     let parent_ent = find_entity_object_by_name(name_parent);
+    if(child_ent == null){
+        toastr.error("Please repeat your whole sentence!", "Could not find child entity type named \"" + name_child + "\".");
+        return;
+    }
+    if(parent_ent == null){
+        toastr.error("Please repeat your whole sentence!", "Could not find paren entity type named \"" + name_child + "\".");
+        return;
+    }
     if(child_ent.attributes.inhertitanceConnectionToParent.length == 0){
         make_new_isa_connection(child_ent, parent_ent);
     }else{
@@ -32819,7 +32827,9 @@ function create_entity_type(name_entity){
 
         graph.addCell(ent_obj);
         class_buttons.highlightElement(ent_obj);
+        return;
     }
+    toastr.error("Something wrong with create Entity type");
 }
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
     let list_entities = class_buttons.findAllEntities();
@@ -32858,13 +32868,14 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         class_buttons.createLink(currentElement, attr_obj);
         currentElement.attributes.listChildren.push(attr_obj.id);
         class_buttons.highlightElement(attr_obj);
-    }
-    
+    }else{
+        toastr.error("Something wrong with create attribute type!");
+    }  
 }
 
-function create_sub_attribute_type(name_sub_attribute, name_attribute, name_entity){
+function create_sub_attribute_type(name_sub_attribute, name_attribute){
     let list_attr = find_attribute_object_by_name(name_attribute);
-    if(list_attr == null){
+    if(list_attr.length == 0){
         toastr.error( "Please repeat you sentence for creating a sub attribute-type!","Could not find attribute with name \"" + name_attribute + "\"");
         return
     }
@@ -32890,8 +32901,9 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
     let attr_obj = null;
 
     for(i in list_attr){
-        if(list_attr[i] == currentElement);
-        attr_obj = list_attr[i];
+        if(list_attr[i] == currentElement){
+            attr_obj = list_attr[i];
+        }
     }
     if(attr_obj == null){
         //swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
@@ -32917,23 +32929,30 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute, name_enti
 function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
     let ent_obj_1 = find_entity_object_by_name(name_entity_1);
     let ent_obj_2 = find_entity_object_by_name(name_entity_2);
+    if(ent_obj_1 == null){
+        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        return;
+    }
+    if(ent_obj_2 == null){
+        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        return;
+    }
 
     //Every entity-type knows their whole relationsships
-    if(ent_obj_1 != null && ent_obj_2 != null){
-        let rel_obj = new class_buttons.Relationship();
-        rel_obj.attr("text/text", name_relationship);
+    let rel_obj = new class_buttons.Relationship();
+    rel_obj.attr("text/text", name_relationship);
 
-        rel_obj.position((ent_obj_1.position().x + ent_obj_2.position().x)/2, 
-            (ent_obj_1.position().y + ent_obj_2.position().y)/2);
+    rel_obj.position((ent_obj_1.position().x + ent_obj_2.position().x)/2, 
+        (ent_obj_1.position().y + ent_obj_2.position().y)/2);
 
-        graph.addCell(rel_obj);
-        class_buttons.highlightElement(rel_obj);
+    graph.addCell(rel_obj);
+    class_buttons.highlightElement(rel_obj);
 
-        ent_obj_1.attributes.relationship_object.push([ent_obj_1.id, rel_obj.id, ent_obj_2.id]);
-        ent_obj_2.attributes.relationship_object.push([ent_obj_2.id, rel_obj.id, ent_obj_1.id]);
-        create_relationship_connection_1(rel_obj, ent_obj_1);
-        create_relationship_connection_2(rel_obj, ent_obj_2);
-    }
+    ent_obj_1.attributes.relationship_object.push([ent_obj_1.id, rel_obj.id, ent_obj_2.id]);
+    ent_obj_2.attributes.relationship_object.push([ent_obj_2.id, rel_obj.id, ent_obj_1.id]);
+    create_relationship_connection_1(rel_obj, ent_obj_1);
+    create_relationship_connection_2(rel_obj, ent_obj_2);
+    
 }
 
 function create_relationship_connection_1(curr_rel_obj, ent_obj){
@@ -33499,6 +33518,7 @@ paper.on('element:pointermove', function(cellView) {
 
 paper.on('blank:pointerdown', function() {
     highlighter.remove();
+    currentElement = null;
 });
 
 // Classes
@@ -34466,7 +34486,7 @@ const class_buttons = require('./classes_buttons');
 
 const regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 //const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
+const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g,/for ?(?:attribute)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
 const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
@@ -34486,6 +34506,7 @@ dict_replace['a tribute'] = "attribute";
 dict_replace[' s '] = "as";
 dict_replace['up a tribute'] = "sub attribute";
 dict_replace['up attribute'] = "sub attribute";
+dict_replace['sap attribute'] = "sub attribute";
 
 function replace_common_mistakes(input, dict){
     for(let key in dict){
@@ -34929,6 +34950,8 @@ function execute_speech(input){
                 //console.log("Name of second Entity: " + param_entities[1]);
                 classes.create_relationship_type(param_relationship, param_entities[0], param_entities[1]);
             }
+        }else{
+            toastr.error("Please mention the type and the name of the element!","What kind of element type do you want to create?")
         }
     //Create isa type
     }else if(input.indexOf('is a') != -1 || input.indexOf('inherits from') != -1 || input.indexOf('inherit from') != -1 || input.indexOf('is a child of') != -1){
@@ -35058,6 +35081,7 @@ recognition.lang = 'en-US';
 
 micBtn.addEventListener("click", start_or_stop_recording);
 let started = false;
+let first_click = true;
 
 function start_or_stop_recording(){
     if(started == false){
@@ -35065,6 +35089,10 @@ function start_or_stop_recording(){
         document.getElementById('voiceButton').classList.add('glow-on-hover');
         textbox.value = '';
         fianl_transcript = '';
+        if(first_click){
+            first_click = false;
+            toastr.info("You need to click the voice button again to stop the recording!")
+        }
         start_speech_recognition();
         
     }else{

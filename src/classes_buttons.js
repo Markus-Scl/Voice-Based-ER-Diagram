@@ -276,6 +276,7 @@ paper.on('element:pointermove', function(cellView) {
 
 paper.on('blank:pointerdown', function() {
     highlighter.remove();
+    currentElement = null;
 });
 
 // Classes

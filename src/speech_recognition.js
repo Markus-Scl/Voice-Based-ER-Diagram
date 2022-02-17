@@ -15,6 +15,7 @@ recognition.lang = 'en-US';
 
 micBtn.addEventListener("click", start_or_stop_recording);
 let started = false;
+let first_click = true;
 
 function start_or_stop_recording(){
     if(started == false){
@@ -22,6 +23,10 @@ function start_or_stop_recording(){
         document.getElementById('voiceButton').classList.add('glow-on-hover');
         textbox.value = '';
         fianl_transcript = '';
+        if(first_click){
+            first_click = false;
+            toastr.info("You need to click the voice button again to stop the recording!")
+        }
         start_speech_recognition();
         
     }else{
