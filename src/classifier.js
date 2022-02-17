@@ -24,6 +24,8 @@ dict_replace['3 8'] = "create";
 dict_replace['3/8'] = "create";
 dict_replace['a tribute'] = "attribute";
 dict_replace[' s '] = "as";
+dict_replace['up a tribute'] = "sub attribute";
+dict_replace['up attribute'] = "sub attribute";
 
 function replace_common_mistakes(input, dict){
     for(let key in dict){
@@ -70,7 +72,6 @@ function find_do_name(input){
         regex_find_do[i].lastIndex = 0;
         while(match = regex_find_do[i].exec(sentence_preprocessed)){
             let name_do = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-            console.log(name_do);
             return name_do;
             /*if(check_if_noun(name_do)){
                 return name_do;

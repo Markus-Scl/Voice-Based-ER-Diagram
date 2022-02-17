@@ -301,6 +301,6 @@ box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 
     font-size: 12px;
   }
   
-.toastr{
-    margin-top: 100px;
+.toast-bottom-right {
+    bottom: 140px !important;
 }
