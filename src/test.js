@@ -1,7 +1,7 @@
 const rita = require('../node_modules/rita');
 
-const regex_find_attributes = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? is (?:primary key|multi valued|multi-valued)/g];//[/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];//[/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
-let sentence = "make mailing adress multi-valued";
+const regex_find_attributes = [/([a-z]+) has the attribute/g,/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+let sentence = "house has the attribute mailing adress";
 let f = 0;
 for(let i = 0; i < regex_find_attributes.length; i++){
     if(f == 1){
@@ -17,7 +17,7 @@ for(let i = 0; i < regex_find_attributes.length; i++){
 
 
 let r = "mailing";
-console.log(r.split(' ').length);
+//console.log(r.split(' ').length);
 //console.log(rita.pos("create attribute zip code for person"));
 
 const regex_noun = /nn.*/;
@@ -28,5 +28,5 @@ function check_if_noun(word){
         return false;
     }
 }
-
-console.log(check_if_noun("matriculation number"));
+console.log(rita.pos("to visits"));
+//console.log(check_if_noun("matriculation number"));

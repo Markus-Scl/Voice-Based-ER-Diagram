@@ -32802,11 +32802,11 @@ function create_isa_type(name_child, name_parent){
     let child_ent = find_entity_object_by_name(name_child);
     let parent_ent = find_entity_object_by_name(name_parent);
     if(child_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find child entity type named \"" + name_child + "\".");
+        toastr.error("Please repeat your whole sentence!", "Could not find child entity-type named \"" + name_child + "\".");
         return;
     }
     if(parent_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find paren entity type named \"" + name_child + "\".");
+        toastr.error("Please repeat your whole sentence!", "Could not find paren entity-type named \"" + name_child + "\".");
         return;
     }
     if(child_ent.attributes.inhertitanceConnectionToParent.length == 0){
@@ -32869,7 +32869,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         currentElement.attributes.listChildren.push(attr_obj.id);
         class_buttons.highlightElement(attr_obj);
     }else{
-        toastr.error("Something wrong with create attribute type!");
+        toastr.error("Something wrong with create attribute-type!");
     }  
 }
 
@@ -32930,11 +32930,11 @@ function create_relationship_type(name_relationship, name_entity_1, name_entity_
     let ent_obj_1 = find_entity_object_by_name(name_entity_1);
     let ent_obj_2 = find_entity_object_by_name(name_entity_2);
     if(ent_obj_1 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
         return;
     }
     if(ent_obj_2 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
         return;
     }
 
@@ -34484,17 +34484,17 @@ const classes = require('./classes');
 const class_buttons = require('./classes_buttons');
 
 
-const regex_find_entities = [/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_entities = [/([a-z]+) has ?(?:the)? attribute/g, /([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 //const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g,/for ?(?:attribute)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+ ?([a-z]+)?) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
 const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
 const regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
-const regex_find_undo = [/undo (?:primary key|multi valued|multi-valued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
-const regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? ?(?:as)? (?:multi-valued|multi valued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? is (?:primary key|multi valued|multi-valued)/g];
+const regex_find_undo = [/undo (?:primary key|multi valued|multi-valued|multivalued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued|multivalued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
+const regex_find_do = [/make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? ?(?:as)? (?:multi-valued|multi valued|multivalued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? is (?:primary key|multi valued|multi-valued|multivalued)/g, /([a-z]+ ?([a-z]+)?) is ?(?:a|the)? (?:primary key|multi valued|multi-valued|multivalued) ?(?:attribute)?/g];
 const regex_noun = /nn.*/;
 
 const dict_replace = {};
@@ -34559,7 +34559,7 @@ function find_do_name(input){
             }*/
         }
     }
-    if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
+    if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to make multi-valued!", input);
         }
@@ -34586,7 +34586,7 @@ function find_undo_name(input){
             }*/
         }
     }
-    if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
+    if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to undo multi-valued!", input);
         }
@@ -34697,15 +34697,7 @@ function find_relationship_name(input){
         regex_find_relationship[i].lastIndex = 0;
         while(match = regex_find_relationship[i].exec(sentence_preprocessed)){
             relationship_name = match[1];
-            if(check_if_noun(relationship_name) == false){
-                return relationship_name;
-            }
-            if(class_buttons.do_log){
-                execute_ajax_error(class_buttons.user_id, "Couldn't find name of relationsship!", input);
-            }
-            //classes.swal_to_user("Relationship name can't be a noun!", "Pleas repeat your whole sentence!")
-            toastr.error("Relationship name can't be a noun!", "Pleas repeat your whole sentence!", "");
-            return null;
+            return relationship_name;
         }
     }
     if(class_buttons.do_log){
@@ -34873,7 +34865,7 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1){
+    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
@@ -34894,7 +34886,7 @@ function execute_speech(input){
                 param_entity = find_entity_names(input,find_entity_for_rel);
             }
             //Create multi valued attribute
-            if(input.indexOf('multi valued') != -1){
+            if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
                 //console.log('Multi valued will be created');
                 let is_primary_key = false;
                 let is_multi_valued = true;
@@ -34954,7 +34946,7 @@ function execute_speech(input){
             toastr.error("Please mention the type and the name of the element!","What kind of element type do you want to create?")
         }
     //Create isa type
-    }else if(input.indexOf('is a') != -1 || input.indexOf('inherits from') != -1 || input.indexOf('inherit from') != -1 || input.indexOf('is a child of') != -1){
+    }else if((input.indexOf('is a') != -1 || input.indexOf('inherits from') != -1 || input.indexOf('inherit from') != -1 || input.indexOf('is a child of') != -1) && (input.indexOf('primary key') == -1 && input.indexOf('multi valued') == -1) && input.indexOf('multi-valued') == -1 && input.indexOf('multivalued') == -1){
         //console.log("Create isa type");
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Create isa-type", input);
@@ -35001,7 +34993,7 @@ function execute_speech(input){
         }
         let param_delete = find_delete_object(input);
         classes.delete_object(param_delete);
-    }else if(input.indexOf('undo') != -1 || input.indexOf('make') != -1){
+    }else if(input.indexOf('undo') != -1 || input.indexOf('make') != -1 || input.indexOf('primary key') != -1 || input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
         //Undo primary key or multivalued
         if(input.indexOf('undo') != -1 || input.indexOf('make') != -1 && input.indexOf('not') != -1 || input.indexOf('make') != -1 && input.indexOf('single valued') != -1){
             if(input.indexOf('primary key') != -1){
@@ -35013,7 +35005,7 @@ function execute_speech(input){
                 if(param_undo != null){
                     classes.undo_primary_key(param_undo);
                 }
-            }else if(input.indexOf('multi valued') != -1 || input.indexOf('single valued') || input.indexOf('multi-valued') != -1 || input.indexOf('single-valued')){
+            }else if(input.indexOf('multi valued') != -1 || input.indexOf('single valued') || input.indexOf('multi-valued') != -1 || input.indexOf('single-valued') || input.indexOf('multivalued') != -1 || input.indexOf('singlevalued')){
                 //console.log("undo multi valued");
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo multivalued", input);
@@ -35026,7 +35018,7 @@ function execute_speech(input){
                 //console.log("can't find attribute to undo action");
             }
         //Make attribute multivalued or as primary key
-        }else if(input.indexOf('make') != -1 && input.indexOf('not') == -1){
+        }else if((input.indexOf('make') != -1 && input.indexOf('not') == -1) || (input.indexOf('primary key') != -1 || input.indexOf('multi valued') != -1) || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
             //Make attribute primary key
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Make attribute-type primary key or multi-valued", input);
@@ -35039,7 +35031,7 @@ function execute_speech(input){
                     }
                     //console.log("Make attribute primary key!");
                     classes.make_primary_key(param_do);
-                }else if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1){
+                }else if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
                     if(class_buttons.do_log){
                         execute_ajax(class_buttons.user_id, "Make attribute-type multi-valued", input);
                     }

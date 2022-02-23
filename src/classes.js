@@ -148,11 +148,11 @@ function create_isa_type(name_child, name_parent){
     let child_ent = find_entity_object_by_name(name_child);
     let parent_ent = find_entity_object_by_name(name_parent);
     if(child_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find child entity type named \"" + name_child + "\".");
+        toastr.error("Please repeat your whole sentence!", "Could not find child entity-type named \"" + name_child + "\".");
         return;
     }
     if(parent_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find paren entity type named \"" + name_child + "\".");
+        toastr.error("Please repeat your whole sentence!", "Could not find paren entity-type named \"" + name_child + "\".");
         return;
     }
     if(child_ent.attributes.inhertitanceConnectionToParent.length == 0){
@@ -215,7 +215,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         currentElement.attributes.listChildren.push(attr_obj.id);
         class_buttons.highlightElement(attr_obj);
     }else{
-        toastr.error("Something wrong with create attribute type!");
+        toastr.error("Something wrong with create attribute-type!");
     }  
 }
 
@@ -276,11 +276,11 @@ function create_relationship_type(name_relationship, name_entity_1, name_entity_
     let ent_obj_1 = find_entity_object_by_name(name_entity_1);
     let ent_obj_2 = find_entity_object_by_name(name_entity_2);
     if(ent_obj_1 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
         return;
     }
     if(ent_obj_2 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity type named \"" + name_entity_1 + "\" for creating a relationship.");
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
         return;
     }
 
