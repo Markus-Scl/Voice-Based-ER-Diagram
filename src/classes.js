@@ -155,7 +155,7 @@ function create_isa_type(name_child, name_parent){
         toastr.error("Please repeat your whole sentence!", "Could not find paren entity-type named \"" + name_child + "\".");
         return;
     }
-    if(child_ent.attributes.inhertitanceConnectionToParent.length == 0){
+    if(child_ent.attributes.inheritanceConnectionToParent.length == 0){
         make_new_isa_connection(child_ent, parent_ent);
     }else{
         change_isa_connections(child_ent);
@@ -531,24 +531,24 @@ function make_new_isa_connection(child_ent, parent_ent){
     isa_link = class_buttons.createLink(child_ent, isa);
     
     parent_ent.attributes.isParentEntity = true;
-    let inhertitance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
+    let inheritance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
     
-    parent_ent.attributes.inhertitanceConnectionsToChildren.push(inhertitance_connection_to_child);
+    parent_ent.attributes.inheritanceConnectionsToChildren.push(inheritance_connection_to_child);
 
-    child_ent.attributes.inhertitanceConnectionToParent.push(parent_ent.id,isa.id,isa_link.id);
+    child_ent.attributes.inheritanceConnectionToParent.push(parent_ent.id,isa.id,isa_link.id);
 }
 
 function change_isa_connections(child_ent){
-    let parent_ent = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[0]);
-    let isa = get_elements_by_id(child_ent.attributes.inhertitanceConnectionToParent[1]);
-    let isa_link = get_links_by_id(child_ent.attributes.inhertitanceConnectionToParent[2]);
+    let parent_ent = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[0]);
+    let isa = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[1]);
+    let isa_link = get_links_by_id(child_ent.attributes.inheritanceConnectionToParent[2]);
     
     graph.removeCells(isa,isa_link);
     
-    child_ent.attributes.inhertitanceConnectionToParent = [];
+    child_ent.attributes.inheritanceConnectionToParent = [];
     
-    parent_ent.attributes.inhertitanceConnectionsToChildren = remove_connection_from_child_list(child_ent, parent_ent.attributes.inhertitanceConnectionsToChildren);
-    if(parent_ent.attributes.inhertitanceConnectionsToChildren.length == 0){
+    parent_ent.attributes.inheritanceConnectionsToChildren = remove_connection_from_child_list(child_ent, parent_ent.attributes.inheritanceConnectionsToChildren);
+    if(parent_ent.attributes.inheritanceConnectionsToChildren.length == 0){
         parent_ent.attributes.isParentEntity = false;
     }
 }

@@ -299,8 +299,8 @@ class Entity extends erd.Entity {
     constructor(args = {}) {
         let args_new = {
             isParentEntity : false,
-            inhertitanceConnectionToParent : [],
-            inhertitanceConnectionsToChildren : [],
+            inheritanceConnectionToParent : [],
+            inheritanceConnectionsToChildren : [],
             listChildren : [],
             relationship_object: [],
             position: { x: 100, y: 200 },
@@ -979,16 +979,16 @@ function deleteAttribute(elm){
 function deleteEntity(elm){
     let isaParentEntity = elm.attributes.isParentEntity;
     //This is a Parent-Entity (other entity-types inherit), and doesn't inherit from other entity-type. Have to remove all connections to its children and the information of ConnectionToParent in chihldnode (entity-type)
-    if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length == 0){
+    if(isaParentEntity && elm.attributes.inheritanceConnectionToParent.length == 0){
         removeChildrenInheritance(elm);
     //Is parent entity-type and inhertits from other entity-type
-    }else if(isaParentEntity && elm.attributes.inhertitanceConnectionToParent.length > 0){
+    }else if(isaParentEntity && elm.attributes.inheritanceConnectionToParent.length > 0){
         removeChildrenInheritance(elm);
         removeParentInheritance(elm);
     }
     else{
         //Only inherits form other entity-type --> has no entity-type children
-        if(elm.attributes.inhertitanceConnectionToParent.length > 0){
+        if(elm.attributes.inheritanceConnectionToParent.length > 0){
             removeParentInheritance(elm);
         }
     }
@@ -1001,11 +1001,11 @@ function deleteEntity(elm){
 }
 //Helper function for deleteEntity()
 function removeChildrenInheritance(elm){
-    let childList = elm.attributes.inhertitanceConnectionsToChildren;
+    let childList = elm.attributes.inheritanceConnectionsToChildren;
     for(childConnection in childList){
         let child = get_elements_by_id(childList[childConnection][0]);
         //Delete informatin about its parent entity-type
-        child.attributes.inhertitanceConnectionToParent = [];
+        child.attributes.inheritanceConnectionToParent = [];
         let isa = get_elements_by_id(childList[childConnection][1]);
         let isaLink = get_links_by_id(childList[childConnection][2]);
         graph.removeCells(isa, isaLink);
@@ -1013,10 +1013,10 @@ function removeChildrenInheritance(elm){
 }
 //Helper function to deletEntity()
 function removeParentInheritance(elm){
-    let parent = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[0]);
-    let isa = get_elements_by_id(elm.attributes.inhertitanceConnectionToParent[1]);
-    let isaLink = get_links_by_id(elm.attributes.inhertitanceConnectionToParent[2]);
-    let childListOfParent = parent.attributes.inhertitanceConnectionsToChildren;
+    let parent = get_elements_by_id(elm.attributes.inheritanceConnectionToParent[0]);
+    let isa = get_elements_by_id(elm.attributes.inheritanceConnectionToParent[1]);
+    let isaLink = get_links_by_id(elm.attributes.inheritanceConnectionToParent[2]);
+    let childListOfParent = parent.attributes.inheritanceConnectionsToChildren;
 
     //Delete information about child entity-type in parent
     childListOfParent = removeConnectionFromChildlist(elm, childListOfParent);
@@ -1154,13 +1154,13 @@ function createISA(){
     let selectValue = document.getElementById("ISA-Select").value;
     //Get the Entity-Object, which has to be connected with the relationsship
     let connectionObject = storedEntitiesISA[selectValue];
-    if(currentElement.attributes.inhertitanceConnectionToParent.length == 0){
+    if(currentElement.attributes.inheritanceConnectionToParent.length == 0){
         makeNewIsaConnection(currentElement, connectionObject);
     // Entity is alreday inherited, but user select to undo the inheritance
-    }else if(selectValue == "" && currentElement.attributes.inhertitanceConnectionToParent.length > 0){
+    }else if(selectValue == "" && currentElement.attributes.inheritanceConnectionToParent.length > 0){
         changeIsaConnections(currentElement);
     // Current Entity already inherited, user chooses other parent --> delete current inheritance and create new one
-    }else if(selectValue != "" && currentElement.attributes.inhertitanceConnectionToParent.length > 0){
+    }else if(selectValue != "" && currentElement.attributes.inheritanceConnectionToParent.length > 0){
         changeIsaConnections(currentElement);
         makeNewIsaConnection(currentElement, connectionObject);
     }
@@ -1176,30 +1176,30 @@ function makeNewIsaConnection(currElement, parentElement){
     isaLink = createLink(currElement, isa);
     
     parentElement.attributes.isParentEntity = true;
-    let inhertitanceConnectionToChild = [currElement.id,isa.id,isaLink.id];
+    let inheritanceConnectionToChild = [currElement.id,isa.id,isaLink.id];
     
-    parentElement.attributes.inhertitanceConnectionsToChildren.push(inhertitanceConnectionToChild);
+    parentElement.attributes.inheritanceConnectionsToChildren.push(inheritanceConnectionToChild);
 
-    currElement.attributes.inhertitanceConnectionToParent.push(parentElement.id,isa.id,isaLink.id);
+    currElement.attributes.inheritanceConnectionToParent.push(parentElement.id,isa.id,isaLink.id);
 }
 
 function changeIsaConnections(currElement){
-    let parent = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[0]);
-    let isa = get_elements_by_id(currElement.attributes.inhertitanceConnectionToParent[1]);
-    let isaLink = get_links_by_id(currElement.attributes.inhertitanceConnectionToParent[2]);
+    let parent = get_elements_by_id(currElement.attributes.inheritanceConnectionToParent[0]);
+    let isa = get_elements_by_id(currElement.attributes.inheritanceConnectionToParent[1]);
+    let isaLink = get_links_by_id(currElement.attributes.inheritanceConnectionToParent[2]);
     
     graph.removeCells(isa,isaLink);
     
-    currElement.attributes.inhertitanceConnectionToParent = [];
+    currElement.attributes.inheritanceConnectionToParent = [];
     
-    parent.attributes.inhertitanceConnectionsToChildren = removeConnectionFromChildlist(currentElement, parent.attributes.inhertitanceConnectionsToChildren);
-    if(parent.attributes.inhertitanceConnectionsToChildren.length == 0){
+    parent.attributes.inheritanceConnectionsToChildren = removeConnectionFromChildlist(currentElement, parent.attributes.inheritanceConnectionsToChildren);
+    if(parent.attributes.inheritanceConnectionsToChildren.length == 0){
         parent.attributes.isParentEntity = false;
     }
 }
 
 function updateIsaPosition(){
-    let childrenList = currentElement.attributes.inhertitanceConnectionsToChildren;
+    let childrenList = currentElement.attributes.inheritanceConnectionsToChildren;
     if(childrenList.length > 0){
         for(child in childrenList){
             let isa = get_elements_by_id(childrenList[child][1]);
@@ -1209,7 +1209,7 @@ function updateIsaPosition(){
 }
 
 function updateIsaSelect(){
-    let parentConnection = currentElement.attributes.inhertitanceConnectionToParent;
+    let parentConnection = currentElement.attributes.inheritanceConnectionToParent;
     if(parentConnection.length > 0){
         document.getElementById("ISA-Select").value = get_elements_by_id(parentConnection[0]).attributes.attrs.text.text;
     }
