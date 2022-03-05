@@ -32852,7 +32852,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         attr_obj.position(ent_obj.position().x-30+Math.floor(Math.random()*60),
             ent_obj.position().y-30+Math.floor(Math.random()*60));
         
-        attr_obj.attributes.listParent.push(ent_obj.id);
+        attr_obj.attributes.parentObj = ent_obj.id;
 
         graph.addCell(attr_obj);
         class_buttons.createLink(ent_obj, attr_obj);
@@ -32862,7 +32862,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
             currentElement.position().y-120+Math.floor(Math.random()*240));
             
-        attr_obj.attributes.listParent.push(currentElement.id);
+        attr_obj.attributes.parentObj = currentElement.id;
 
         graph.addCell(attr_obj);
         class_buttons.createLink(currentElement, attr_obj);
@@ -32888,7 +32888,7 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute){
         sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
             attr_obj.position().y-120+Math.floor(Math.random()*240));
 
-        sub_attr_obj.attributes.listParent.push(attr_obj.id);
+        sub_attr_obj.attributes.parentObj = attr_obj.id;
 
         attr_obj.attributes.listChildren.push(sub_attr_obj.id);
 
@@ -32917,7 +32917,7 @@ function create_sub_attribute_type(name_sub_attribute, name_attribute){
     sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
         attr_obj.position().y-120+Math.floor(Math.random()*240));
 
-    sub_attr_obj.attributes.listParent.push(attr_obj.id);
+    sub_attr_obj.attributes.parentObj = attr_obj.id;
 
     attr_obj.attributes.listChildren.push(sub_attr_obj.id);
 
@@ -33682,7 +33682,7 @@ class Key extends erd.Key {
 class Attribute extends erd.Normal {
     constructor(args = {}) {
         let args_new = {
-        listParent:[],
+        parentObj: null,
         listChildren : [],
         position: { x: 75, y: 30 },
         attrs: {
@@ -33874,7 +33874,7 @@ function createEntityType(){
 function createAttributType(){
     let attr_obj = new Attribute();
     //Every attribute-type knows its parent entity-type
-    attr_obj.attributes.listParent.push(currentElement.id);
+    attr_obj.attributes.parentObj = currentElement.id;
 
     attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
             currentElement.position().y-120+Math.floor(Math.random()*240));
@@ -33894,7 +33894,7 @@ function createAttributType(){
 function createSubAttributType(){
     let sub_attr_obj = new Attribute();
     //Every sub attribute-type knows its parent attribute
-    sub_attr_obj.attributes.listParent.push(currentElement.id);
+    sub_attr_obj.attributes.parentObj = currentElement.id;
     sub_attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
         currentElement.position().y-120+Math.floor(Math.random()*240));
 
@@ -34202,7 +34202,7 @@ function deleteAttribute(elm){
     //Get the duplicate of the list, else you change dinamically the list you iterate through --> don't deletes every node
     let listAllChildren = elm.attributes.listChildren.slice();
 
-    let parent = get_elements_by_id(elm.attributes.listParent[0]);
+    let parent = get_elements_by_id(elm.attributes.parentObj);
     let parentChildList = parent.attributes.listChildren;
 
     //Find index of attribute in the entity-types child list
