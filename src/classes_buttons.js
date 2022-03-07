@@ -388,7 +388,6 @@ class IdentifyingRelationship extends erd.IdentifyingRelationship {
 class ISA extends erd.ISA {
     constructor(args = {}) {
         let args_new = {
-        listChildren : [],
         position: { x: 160, y: 260 },
         attrs: {
             text: {

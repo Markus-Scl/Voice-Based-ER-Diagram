@@ -1,7 +1,7 @@
 const rita = require('../node_modules/rita');
 
-const regex_find_attributes = [/([a-z]+) has the attribute/g,/([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-let sentence = "house has the attribute mailing adress";
+const regex_find_attributes = [/(?<!sub )attribute ?(?:type)? ?(?:named|called)? (.*)? (?:as)/g];
+let sentence = "create attribute id number as primary key";
 let f = 0;
 for(let i = 0; i < regex_find_attributes.length; i++){
     if(f == 1){
