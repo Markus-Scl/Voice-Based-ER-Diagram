@@ -34483,17 +34483,17 @@ const classes = require('./classes');
 const class_buttons = require('./classes_buttons');
 
 
-const regex_find_entities = [/([a-z]+) has ?(?:the)? attribute/g, /([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_entities = [/([a-z]+) has ?(?:the|an)? attribute/g, /([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 //const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? (.*)? (?:as)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g,/for ?(?:attribute)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+ ?([a-z]+)?) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
-const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
+const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m|each)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-const regex_delete_object = [/ ?(?:entity|attribute|sub attribute|relationship)? ?(?:type)? ?(?:named|called)? (.*)?/g];
+const regex_delete_object = [/ ?(?:the)? ?(?:entity|attribute|sub attribute|relationship|entitytype)? ?(?:type)? ?(?:named|called)? (.*)?/g];
 const regex_find_update_names = [/(?:update|rename|change) ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)? to ?(?:name|named)? ?(?:of)? ?(?:entity|sub attribute|attribute|relationship)? ?(?:type)? ?(?:name|named)? (.*)/g];
 const regex_find_undo = [/undo (?:primary key|multi valued|multi-valued|multivalued) ?(?:for)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? not ?(?:as)? (?:primary key|multi valued|multi-valued|multivalued)/g, /make ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:single valued|single-valued)/g];
-const regex_find_do = [/(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? (?:as)? (?:multi-valued|multi valued|multivalued|primary key)/g, /(?:sub attribute|attribute)? ?(?:type)? ?(?:name|named)? (.*)? is (?:primary key|multi valued|multi-valued|multivalued)/g, /([a-z]+ ?([a-z]+)?) is ?(?:a|the)? (?:primary key|multi valued|multi-valued|multivalued) ?(?:attribute)?/g];
+const regex_find_do = [/ ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:as|is)? (?:the|a)? (?:multi-valued|multi valued|multivalued|primary key)/g, / ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:as|the|is)? (?:multi-valued|multi valued|multivalued|primary key)/g, / ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:multi-valued|multi valued|multivalued|primary key)/g, /(?:primary key|multi valued|multi-valued|multivalued) is ?(?:the)? (.*)?/];
 const regex_noun = /nn.*/;
 
 const dict_replace = {};
@@ -34864,7 +34864,7 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1){
+    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1 || input.indexOf(' has an attribute ') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             //console.log('Entity will be created');
@@ -34985,7 +34985,7 @@ function execute_speech(input){
         //console.log(params_rename);
         classes.rename_object(params_rename[0], params_rename[1]);
     //Delet objects
-    }else if (input.indexOf('delete') != -1 || input.indexOf('remove') != -1 || input.indexOf('cancel') != -1){
+    }else if (input.indexOf('delete') != -1 || input.indexOf('remove') != -1 || input.indexOf('cancel') != -1 || input.indexOf('drop ') != -1){
         //console.log("Delete");
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Delete element", input);

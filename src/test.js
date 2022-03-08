@@ -1,7 +1,7 @@
 const rita = require('../node_modules/rita');
 
-const regex_find_attributes = [/(?<!sub )attribute ?(?:type)? ?(?:named|called)? (.*)? (?:as)/g];
-let sentence = "create attribute id number as primary key";
+const regex_find_attributes = [/ ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:as|is)? (?:the|a)? (?:multi-valued|multi valued|multivalued|primary key)/g, / ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:as|the|is)? (?:multi-valued|multi valued|multivalued|primary key)/g, / ?(?:make)? ?(?:sub attribute|attribute)? ?(?:type)? ?(?:named|called)? ?(.*) (?:multi-valued|multi valued|multivalued|primary key)/g,/([a-z]+ ?([a-z]+)?) is ?(?:a|the)? (?:primary key|multi valued|multi-valued|multivalued) ?(?:attribute)?/g, /(?:primary key|multi valued|multi-valued|multivalued) is ?(?:the)? (.*)?/];
+let sentence = "university name is a primary key";
 let f = 0;
 for(let i = 0; i < regex_find_attributes.length; i++){
     if(f == 1){
@@ -10,6 +10,7 @@ for(let i = 0; i < regex_find_attributes.length; i++){
     regex_find_attributes[i].lastIndex = 0;
     while(match = regex_find_attributes[i].exec(sentence)){
         console.log(match[1]+"#");
+        console.log(regex_find_attributes[i]);
         f=1;
         break;
     }
