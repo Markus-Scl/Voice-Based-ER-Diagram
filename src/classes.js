@@ -38,13 +38,16 @@ function find_entity_object_by_name(name_entity){
         }
     }
     //Didn't understand the right word from user input, takes the closest word instead (if there is one)
-    list_lev.sort();
-    if(list_lev[0][0] >= 1){
-        return null;
+    if(elementsList.length != 0){
+        list_lev.sort();
+        if(list_lev[0][0] >= 1){
+            return null;
+        }
+        let closest_word = list_lev[0][1];
+        let ent_obj = find_entity_object_by_name(closest_word);
+        return ent_obj;
     }
-    let closest_word = list_lev[0][1];
-    let ent_obj = find_entity_object_by_name(closest_word);
-    return ent_obj;
+    return null;
 }
 function find_attribute_object_by_name(name_attribute){
     let elementsList = graph.getElements();
@@ -180,9 +183,11 @@ function create_entity_type(name_entity){
 function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
     let list_entities = class_buttons.findAllEntities();
     if(list_entities.length == 0){
-        //swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
-        toastr.error("","You need to create an entity-type first before adding an attribute-type!");
-        return;
+        if(name_entity == null){
+            //swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
+            toastr.error("","You need to create an entity-type first before adding an attribute-type!");
+            return;
+        }
     }
     let attr_obj = new class_buttons.Attribute();
     attr_obj.attr("text/text", name_attribute); 
@@ -204,7 +209,18 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         class_buttons.createLink(ent_obj, attr_obj);
         ent_obj.attributes.listChildren.push(attr_obj.id);
         class_buttons.highlightElement(attr_obj);
-    }else if(currentElement != null){
+    }else if(name_entity != null){
+        create_entity_type(name_entity);
+        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
+            currentElement.position().y-120+Math.floor(Math.random()*240));
+            
+        attr_obj.attributes.parentObj = currentElement.id;
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(currentElement, attr_obj);
+        currentElement.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    } else if(currentElement != null){
         attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
             currentElement.position().y-120+Math.floor(Math.random()*240));
             
@@ -215,7 +231,7 @@ function create_attribute_type(name_attribute, name_entity, is_primary_key, is_m
         currentElement.attributes.listChildren.push(attr_obj.id);
         class_buttons.highlightElement(attr_obj);
     }else{
-        toastr.error("Something wrong with create attribute-type!");
+        toastr.error("Pleas mention the name of the entity-type you want to create the attribute-type for aswell, or click on an element and repeat your sentence!");
     }  
 }
 
