@@ -1,8 +1,8 @@
-const joint = require('../node_modules/jointjs');
-const uniqid = require('../node_modules/uniqid');
+const joint = require('jointjs');
+const uniqid = require('uniqid');
 
 const user_id = uniqid();
-const do_log = true;
+const do_log = false;
 
 
 const ent_button = document.getElementById('ent_button');
@@ -1216,7 +1216,6 @@ function updateIsaSelect(){
 }
 
 module.exports = {
-    erd:erd,
     graph:graph,
     paper:paper,
     highlighter: highlighter,

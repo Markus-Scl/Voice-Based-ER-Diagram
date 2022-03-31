@@ -4,8 +4,6 @@ const textbox = document.getElementById("textbox");
 const micBtn = document.getElementById("voiceButton");  
 
 const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-
 const recognition = new speechRecognition();
 
 recognition.interimResults = true;
@@ -38,13 +36,11 @@ function start_or_stop_recording(){
 
 
 
-function start_speech_recognition(){
-    //console.log("started speech recognition");    
+function start_speech_recognition(){ 
     recognition.start();
     }
     
 function stop_speech_recognition(){
-    //console.log("stopped speech recognition"); 
     recognition.stop();
 }
 
@@ -57,8 +53,6 @@ function startSpeechRecognition(){
 
 recognition.addEventListener("end", endSpeechRecognition);
 function endSpeechRecognition(){
-    //console.log("Speech Recognition disconnected");
-    //console.log(fianl_transcript);
     classifier.execute_speech(fianl_transcript);
 }
 

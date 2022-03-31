@@ -32652,615 +32652,11 @@ function now(){
 
 }).call(this)}).call(this,require('_process'))
 },{"_process":2,"os":1}],11:[function(require,module,exports){
-const class_buttons = require('./classes_buttons');
-const levenshtein = require('../node_modules/js-levenshtein');
-//const swal = require('../node_modules/sweetalert');
-
-
-
-const erd = class_buttons.erd;
-const graph = class_buttons.graph;
-const paper = class_buttons.paper;
-//const highlighter = class_buttons.highlighter;
-
-//Helpers
-function get_levenshtein(word_input, name_object){
-    return [levenshtein(word_input, name_object)/get_length_of_shorter_word(word_input,name_object), name_object];
-}
-function get_length_of_shorter_word(word1, word2){
-    if(word1.length <= word2.length){
-        return word1.length;
-    }
-    return word2.length;
-}
-//Helper functions to find objects by name
-function find_entity_object_by_name(name_entity){
-    if(name_entity == null){
-        return null
-    }
-    let elementsList = graph.getElements();
-    let list_lev = [];
-    for(elm in elementsList){
-        let elementType = String(elementsList[elm].attributes.type);
-        if(elementType.includes("Entity")){
-            element_name = elementsList[elm].attr("text/text");
-            //Calculate difference between words
-            list_lev.push(get_levenshtein(name_entity, element_name));
-            if(element_name == name_entity){
-                return elementsList[elm];
-            }
-        }
-    }
-    //Didn't understand the right word from user input, takes the closest word instead (if there is one)
-    if(elementsList.length != 0){
-        list_lev.sort();
-        if(list_lev[0][0] >= 1){
-            return null;
-        }
-        let closest_word = list_lev[0][1];
-        let ent_obj = find_entity_object_by_name(closest_word);
-        return ent_obj;
-    }
-    return null;
-}
-function find_attribute_object_by_name(name_attribute){
-    let elementsList = graph.getElements();
-    let list_attr = [];
-    let list_lev = [];
-    for(elm in elementsList){
-        let elementType = String(elementsList[elm].attributes.type);
-        if(elementType.includes("Normal")){
-            element_name = elementsList[elm].attr("text/text");
-            list_lev.push(get_levenshtein(name_attribute, element_name));
-            if(element_name == name_attribute){
-                list_attr.push(elementsList[elm]);
-            }
-        }
-    }
-    
-    if(list_attr.length != null){
-        return list_attr;
-    }
-    list_lev.sort();
-    if(list_lev[0][0] >= 1){
-        return null;
-    }
-    let closest_word = list_lev[0][1];
-    let attr_obj = find_attribute_object_by_name(closest_word);
-    return [attr_obj];
-}
-
-function find_attribute_of_object(ent_obj, name_attribute){
-    let list_attrs = ent_obj.attributes.listChildren;
-    let list_lev = [];
-    for(attr_obj in list_attrs){
-        list_lev.push(get_levenshtein(name_attribute, list_attrs[attr_obj].attr("text/text")));
-        if(list_attrs[attr_obj].attr("text/text") == name_attribute){
-            return list_attrs[attr_obj];
-        }
-    }
-    list_lev.sort();
-    if(list_lev[0][0] >= 1){
-        return null;
-    }
-    let closest_word = list_lev[0][1];
-    let attr_obj = find_attribute_of_object(closest_word);
-    return attr_obj;
-}
-
-/*function find_relationship(name_second_entity, ent_obj){
-    list_rel = ent_obj.attributes.relationship_object;
-    for(rel in rel_obj){
-        if(rel_obj[rel][2].attr("text/text") == name_second_entity){
-            return rel_obj[rel][1];
-        }
-    }
-}*/
-
-function find_object_by_name(name_object){
-    let elementsList = graph.getElements();
-    let match_elements = [];
-    let list_lev = [];
-    for(elm in elementsList){
-        let element_name = elementsList[elm].attr("text/text");
-        list_lev.push(get_levenshtein(name_object, element_name));
-        if(element_name == name_object){
-            match_elements.push(elementsList[elm]);
-        }
-    }
-    if(match_elements.length != 0){
-        return match_elements;
-    }
-    list_lev.sort();
-    let threshold_value_for_word_beiing_similar = 0.7;
-    if(list_lev[0][0] >= threshold_value_for_word_beiing_similar){
-        return null;
-    }
-    let closest_word = list_lev[0][1];
-    let obj_list = find_object_by_name(closest_word);
-    return obj_list;
-}
-function get_elements_by_id(id){
-    let elementsList = graph.getElements();
-    for(i in elementsList){
-        if(elementsList[i].id == id){
-            return elementsList[i];
-        }
-    }
-    return null;
-}
-
-function get_links_by_id(id){
-    let linksList = graph.getLinks();
-    for(i in linksList){
-        if(linksList[i].id == id){
-            return linksList[i];
-        }
-    }
-    return null;
-}
-
-//Functions for creating objects
-function create_isa_type(name_child, name_parent){
-    let child_ent = find_entity_object_by_name(name_child);
-    let parent_ent = find_entity_object_by_name(name_parent);
-    if(child_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find child entity-type named \"" + name_child + "\".");
-        return;
-    }
-    if(parent_ent == null){
-        toastr.error("Please repeat your whole sentence!", "Could not find paren entity-type named \"" + name_child + "\".");
-        return;
-    }
-    if(child_ent.attributes.inheritanceConnectionToParent.length == 0){
-        make_new_isa_connection(child_ent, parent_ent);
-    }else{
-        change_isa_connections(child_ent);
-        make_new_isa_connection(child_ent, parent_ent);
-    }
-}
-
-function create_entity_type(name_entity){
-    if(name_entity != null){
-        let ent_obj = new class_buttons.Entity;
-        ent_obj.attr("text/text", name_entity); 
-
-        ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
-            Math.floor(Math.random() * (paper.getArea().height-65)));
-
-        graph.addCell(ent_obj);
-        class_buttons.highlightElement(ent_obj);
-        return;
-    }
-    toastr.error("Something wrong with create Entity type");
-}
-function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
-    let list_entities = class_buttons.findAllEntities();
-    if(list_entities.length == 0){
-        if(name_entity == null){
-            //swal_to_user("You need to create an entity-type first before adding an attribute-type!",null);
-            toastr.error("","You need to create an entity-type first before adding an attribute-type!");
-            return;
-        }
-    }
-    let attr_obj = new class_buttons.Attribute();
-    attr_obj.attr("text/text", name_attribute); 
-    if(is_primary_key){
-        attr_obj.attr("text/text-decoration", "underline");
-    }
-    if(is_multi_valued){
-        makeAttributeMultivalued(attr_obj);
-    }
-
-    ent_obj = find_entity_object_by_name(name_entity);
-    if(ent_obj != null){
-        attr_obj.position(ent_obj.position().x-30+Math.floor(Math.random()*60),
-            ent_obj.position().y-30+Math.floor(Math.random()*60));
-        
-        attr_obj.attributes.parentObj = ent_obj.id;
-
-        graph.addCell(attr_obj);
-        class_buttons.createLink(ent_obj, attr_obj);
-        ent_obj.attributes.listChildren.push(attr_obj.id);
-        class_buttons.highlightElement(attr_obj);
-    }else if(name_entity != null){
-        create_entity_type(name_entity);
-        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
-            currentElement.position().y-120+Math.floor(Math.random()*240));
-            
-        attr_obj.attributes.parentObj = currentElement.id;
-
-        graph.addCell(attr_obj);
-        class_buttons.createLink(currentElement, attr_obj);
-        currentElement.attributes.listChildren.push(attr_obj.id);
-        class_buttons.highlightElement(attr_obj);
-    } else if(currentElement != null){
-        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
-            currentElement.position().y-120+Math.floor(Math.random()*240));
-            
-        attr_obj.attributes.parentObj = currentElement.id;
-
-        graph.addCell(attr_obj);
-        class_buttons.createLink(currentElement, attr_obj);
-        currentElement.attributes.listChildren.push(attr_obj.id);
-        class_buttons.highlightElement(attr_obj);
-    }else{
-        toastr.error("Pleas mention the name of the entity-type you want to create the attribute-type for aswell, or click on an element and repeat your sentence!");
-    }  
-}
-
-function create_sub_attribute_type(name_sub_attribute, name_attribute){
-    let list_attr = find_attribute_object_by_name(name_attribute);
-    if(list_attr.length == 0){
-        toastr.error( "Please repeat you sentence for creating a sub attribute-type!","Could not find attribute with name \"" + name_attribute + "\"");
-        return
-    }
-    //There is only one attribut with that name
-    else if(list_attr.length == 1){
-        let attr_obj = list_attr[0];
-        let sub_attr_obj = new class_buttons.Attribute();
-        sub_attr_obj.attr("text/text", name_sub_attribute);
-
-        sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
-            attr_obj.position().y-120+Math.floor(Math.random()*240));
-
-        sub_attr_obj.attributes.parentObj = attr_obj.id;
-
-        attr_obj.attributes.listChildren.push(sub_attr_obj.id);
-
-        graph.addCell(sub_attr_obj);
-        class_buttons.createLink(attr_obj,sub_attr_obj);
-        class_buttons.highlightElement(sub_attr_obj);
-        return;
-    }
-    //There are more attributes with that name
-    let attr_obj = null;
-
-    for(i in list_attr){
-        if(list_attr[i] == currentElement){
-            attr_obj = list_attr[i];
-        }
-    }
-    if(attr_obj == null){
-        //swal("There are multiple attributes with the name \"" + name_attribute + "\"", "Please mention the name of the entity aswell!");
-        toastr.error( "Please click on the attribute where you want to add a sub attribute!","There are multiple attributes with the name \"" + name_attribute + "\"");
-        return;
-    }
-
-    let sub_attr_obj = new class_buttons.Attribute();
-    sub_attr_obj.attr("text/text", name_sub_attribute);
-
-    sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
-        attr_obj.position().y-120+Math.floor(Math.random()*240));
-
-    sub_attr_obj.attributes.parentObj = attr_obj.id;
-
-    attr_obj.attributes.listChildren.push(sub_attr_obj.id);
-
-    graph.addCell(sub_attr_obj);
-    class_buttons.createLink(attr_obj,sub_attr_obj);
-    class_buttons.highlightElement(sub_attr_obj);    
-}
-
-function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
-    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    if(ent_obj_1 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
-        return;
-    }
-    if(ent_obj_2 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
-        return;
-    }
-
-    //Every entity-type knows their whole relationsships
-    let rel_obj = new class_buttons.Relationship();
-    rel_obj.attr("text/text", name_relationship);
-
-    rel_obj.position((ent_obj_1.position().x + ent_obj_2.position().x)/2, 
-        (ent_obj_1.position().y + ent_obj_2.position().y)/2);
-
-    graph.addCell(rel_obj);
-    class_buttons.highlightElement(rel_obj);
-
-    ent_obj_1.attributes.relationship_object.push([ent_obj_1.id, rel_obj.id, ent_obj_2.id]);
-    ent_obj_2.attributes.relationship_object.push([ent_obj_2.id, rel_obj.id, ent_obj_1.id]);
-    create_relationship_connection_1(rel_obj, ent_obj_1);
-    create_relationship_connection_2(rel_obj, ent_obj_2);
-    
-}
-
-function create_relationship_connection_1(curr_rel_obj, ent_obj){
-    let first_link = class_buttons.createLink(curr_rel_obj, ent_obj);
-    first_link.set(create_label("1"));
-    curr_rel_obj.attributes.firstConnectionLink = first_link.id;
-    curr_rel_obj.attributes.firstConnectionObject = ent_obj.id;
-}
-
-function create_relationship_connection_2(curr_rel_obj, ent_obj){
-    let second_link = class_buttons.createLink(curr_rel_obj, ent_obj);
-    second_link.set(create_label("1"));
-    curr_rel_obj.attributes.secondConnectionLink = second_link.id;
-    curr_rel_obj.attributes.secondConnectionObject = ent_obj.id;
-}
-let create_label = function(txt) {
-    return {
-        labels: [{
-            position: 0.3,
-            attrs: {
-                text: { dy: -8, text: txt+"\n", fill: '#000000' },
-                rect: { fill: 'none' }
-            }
-        }]
-    };
-};
-
-/*function swal_to_user(input1, input2){
-    if(input2 == null){
-        swal(input1);
-    }else{
-        swal(input1, input2);
-    }
-    
-}*/
-
-//Helpers to change appearance of objects
-function make_primary_key(name_attr){
-    let attr_objs = find_attribute_object_by_name(name_attr);
-    let elm_found = false;
-    if(attr_objs == null){
-        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make primary key.");
-        return;
-    }
-    
-    if(attr_objs.length == 1){
-        attr_objs[0].attr("text/text-decoration", "underline");
-        return;
-    }
-    for(elm in attr_objs){
-        if(attr_objs[elm] == currentElement){
-            attr_objs[elm].attr("text/text-decoration", "underline"); 
-            elm_found = true;
-            break;
-        }
-    }
-    if(!elm_found){
-        //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to make as primary key and repeat your sentence!');
-        toastr.error('Please click on the attribute you want to make as primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-    }
-}
-function undo_primary_key(name_attr){
-    let attr_objs = find_attribute_object_by_name(name_attr);
-    let elm_found = false;
-    if(attr_objs == null){
-        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo primary key.");
-        return;
-    }
-    if(attr_objs.length == 1){
-        attr_objs[0].attr("text/text-decoration", "none");
-        return;
-    }
-    for(elm in attr_objs){
-        if(attr_objs[elm] == currentElement){
-            attr_objs[elm].attr("text/text-decoration", "none"); 
-            elm_found = true;
-            break;
-        }
-    }
-    if(!elm_found){
-        //swal('There are multiple attributes with the name \"' + name_attr +"\".",'Please click on the attribute you want to undo primary key and repeat your sentence!');
-        toastr('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-    }
-}
-
-function make_multi_valued(name_attr){
-    let attr_objs = find_attribute_object_by_name(name_attr);
-    let elm_found = false;
-    if(attr_objs == null){
-        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make multi valued.");
-        return;
-    }
-    if(attr_objs.length == 1){
-        makeAttributeMultivalued(attr_objs[0]);
-        return;
-    }
-    for(elm in attr_objs){
-        if(attr_objs[elm] == currentElement){
-            makeAttributeMultivalued(attr_obj[elm]);
-            elm_found = true;
-            break;
-        }
-    }
-    if(!elm_found){
-        //swal('There are multiple attributes with the name \"' + name_attr +"\"", 'Please click on the attribute you want to make multi valued and repeat your sentence!');
-        toastr.error('Please click on the attribute you want to make multi valued and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\"");
-    }
-}
-function undo_multi_valued(name_attr){
-    let attr_objs = find_attribute_object_by_name(name_attr);
-    let elm_found = false;
-    if(attr_objs == null){
-        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo multi valued.");
-        return; 
-    }
-    if(attr_objs.length == 1){
-        attr_objs[0].attr(".inner/display", "none");
-        attr_objs[0].attr(".outer/stroke", "#ffcb63");
-        return;
-    }
-    for(elm in attr_objs){
-        if(attr_objs[elm] == currentElement){
-            attr_objs[0].attr(".inner/display", "none");
-            attr_objs[0].attr(".outer/stroke", "#ffcb63"); 
-            elm_found = true;
-            break;
-        }
-    }
-    if(!elm_found){
-        //swal('There are multiple attributes with the name \"' + name_attr +"\".", 'Please click on the attribute you want to undo primary key and repeat your sentence!');
-        toastr.error('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
-    }
-}
-function rename_object(old_name, new_name){
-    let old_objects = find_object_by_name(old_name);
-    let elm_found = false;
-    if(old_objects == null){
-        toastr.error('Please repeat your whole sentence!','Could not find element \"' + old_name +"\" to rename.");
-        return;
-    }
-    if(old_objects.length == 1){
-        let obj = old_objects[0];
-        obj.attr('text/text', new_name);
-        return;
-    }
-    for(elm in old_objects){
-        if(old_objects[elm] == currentElement){
-            let obj = old_objects[elm];
-            obj.attr('text/text', new_name);
-            elm_found = true;
-            break;
-        }
-    }
-    if(!elm_found){
-        //swal('There are multiple objects with the name \"' + old_name +"\".", 'Please click on the object you want to rename and repeat your sentence!');
-        toastr.error('There are multiple objects with the name \"' + old_name +"\".",'Please click on the object you want to rename and repeat your sentence!');
-    }
-    
-}
-function delete_object(name_object){
-    let del_obj_list = find_object_by_name(name_object);
-    let found_elm = false;
-    if(del_obj_list == null){
-        //swal("There is no object called \"" + name_object + "\".", "Can't delete object!");
-        toastr.error("Can't delete object!","There is no object called \"" + name_object + "\".");
-    }else if(del_obj_list.length == 1){
-        class_buttons.deleteElement(del_obj_list[0]);
-    }else{
-        for(elm in del_obj_list){
-            if(del_obj_list[elm] == currentElement){
-                class_buttons.deleteElement(del_obj_list[elm]);
-                found_elm = true;
-                break;
-            }
-        }
-        if(found_elm == false){
-            //swal("There are multiple objects with the name \"" + name_object + "\".", "Please click on the object you want to delete and repeat your sentence!");
-            toastr.error("Please click on the object you want to delete and repeat your sentence!","There are multiple objects with the name \"" + name_object + "\".");
-        }
-    }  
-}
-
-function makeAttributeMultivalued(attr_obj){
-    attr_obj.attr(".inner/display", "block");
-    attr_obj.attr(".inner/fill", "#ffcb63");
-    attr_obj.attr(".inner/stroke", "#797d9a");
-    attr_obj.attr(".outer/stroke", "#797d9a");
-}
-function add_label_to_connection(name_entity_1, val_number, name_entity_2){
-    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
-    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
-    let rel_obj;
-    let list_relationships = ent_obj_1.attributes.relationship_object;
-
-    for(rel in list_relationships){
-        if(get_elements_by_id(list_relationships[rel][2]) == ent_obj_2){
-            rel_obj = get_elements_by_id(list_relationships[rel][1]);
-        }
-    }
-    if(get_elements_by_id(rel_obj.attributes.firstConnectionObject) == ent_obj_2){
-        let link_to_change_val  = get_links_by_id(rel_obj.attributes.firstConnectionLink);
-        let link = get_links_by_id(rel_obj.attributes.secondConnectionLink);
-        let updated_value = check_and_update_label(link, val_number);
-        link_to_change_val.set(create_label(updated_value));
-    }else{
-        let link_to_change_val = get_links_by_id(rel_obj.attributes.secondConnectionLink);
-        let link = get_links_by_id(rel_obj.attributes.firstConnectionLink);
-        let updated_value = check_and_update_label(link, val_number);
-        link_to_change_val.set(create_label(updated_value));
-    }
-}
-
-function check_and_update_label(link, value_to_insert){
-   let value_label = link.attributes.labels[0].attrs.text.text;
-   if(value_to_insert == '1' && value_label == "M\n"){
-        link.set(create_label("N"));
-        return value_to_insert;
-   }else if(value_to_insert == 'N' && value_label == "N\n"){
-        value_to_insert = "M";
-        return value_to_insert;
-    }else{
-        return value_to_insert;
-    }
-}
-
-function make_new_isa_connection(child_ent, parent_ent){
-    let isa = new class_buttons.ISA;
-    isa.position(parent_ent.position().x + 40, parent_ent.position().y +45);
-    graph.addCell(isa);
-    isa_link = class_buttons.createLink(child_ent, isa);
-    
-    parent_ent.attributes.isParentEntity = true;
-    let inheritance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
-    
-    parent_ent.attributes.inheritanceConnectionsToChildren.push(inheritance_connection_to_child);
-
-    child_ent.attributes.inheritanceConnectionToParent.push(parent_ent.id,isa.id,isa_link.id);
-}
-
-function change_isa_connections(child_ent){
-    let parent_ent = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[0]);
-    let isa = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[1]);
-    let isa_link = get_links_by_id(child_ent.attributes.inheritanceConnectionToParent[2]);
-    
-    graph.removeCells(isa,isa_link);
-    
-    child_ent.attributes.inheritanceConnectionToParent = [];
-    
-    parent_ent.attributes.inheritanceConnectionsToChildren = remove_connection_from_child_list(child_ent, parent_ent.attributes.inheritanceConnectionsToChildren);
-    if(parent_ent.attributes.inheritanceConnectionsToChildren.length == 0){
-        parent_ent.attributes.isParentEntity = false;
-    }
-}
-
-function remove_connection_from_child_list(elm, list){
-    let index = find_index_of_child_entity(elm,list);
-    list.splice(index,1);
-    return list;
-}
-
-function find_index_of_child_entity(elm, listOfLists){
-    index = 0;
-    for(listElement in listOfLists){
-        if(get_elements_by_id(listOfLists[listElement][0]) == elm){
-            return index;
-        }else{
-            index +=1;
-        }
-    }
-}
-
-module.exports = {
-    create_entity_type: create_entity_type,
-    create_attribute_type: create_attribute_type,
-    create_relationship_type: create_relationship_type,
-    add_label_to_connection: add_label_to_connection,
-    create_sub_attribute_type: create_sub_attribute_type,
-    create_isa_type: create_isa_type,
-    delete_object: delete_object,
-    rename_object: rename_object,
-    make_primary_key: make_primary_key,
-    undo_primary_key: undo_primary_key,
-    make_multi_valued: make_multi_valued,
-    undo_multi_valued: undo_multi_valued,
-    //swal_to_user: swal_to_user
-}
-},{"../node_modules/js-levenshtein":6,"./classes_buttons":12}],12:[function(require,module,exports){
-const joint = require('../node_modules/jointjs');
-const uniqid = require('../node_modules/uniqid');
+const joint = require('jointjs');
+const uniqid = require('uniqid');
 
 const user_id = uniqid();
-const do_log = true;
+const do_log = false;
 
 
 const ent_button = document.getElementById('ent_button');
@@ -34474,7 +33870,6 @@ function updateIsaSelect(){
 }
 
 module.exports = {
-    erd:erd,
     graph:graph,
     paper:paper,
     highlighter: highlighter,
@@ -34492,15 +33887,13 @@ module.exports = {
     findAllEntities: findAllEntities
 }
 
-},{"../node_modules/jointjs":4,"../node_modules/uniqid":10}],13:[function(require,module,exports){
-//var BayesClassifier = require('bayes-classifier');
+},{"jointjs":4,"uniqid":10}],12:[function(require,module,exports){
 const rita = require('../node_modules/rita');
-const classes = require('./classes');
-const class_buttons = require('./classes_buttons');
+const classes = require('./speech_ER_Diagram');
+const class_buttons = require('./button_ER_Diagram');
 
 
 const regex_find_entities = [/([a-z]+) has ?(?:the|an)? attribute/g, /([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
-//const regex_find_attributes = [/([a-z]+) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? (.*)? (?:as)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g,/for ?(?:attribute)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+ ?([a-z]+)?) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
 const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
@@ -34569,22 +33962,17 @@ function find_do_name(input){
         while(match = regex_find_do[i].exec(sentence_preprocessed)){
             let name_do = match[1].charAt(0).toUpperCase() + match[1].slice(1);
             return name_do;
-            /*if(check_if_noun(name_do)){
-                return name_do;
-            }*/
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to make multi-valued!", input);
         }
-        //classes.swal_to_user("What is the name of the attribute you want to make multi-valued?", "Please repeat your whole sentence!");
         toastr.error("Please repeat your whole sentence!","What is the name of the attribute you want to make multi-valued?");
     }else{
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to make primary key!", input);
         }
-        //classes.swal_to_user("What is the name of the attribute you want to make primary key?", "Please repeat your whole sentence!");
         toastr.error("Please repeat your whole sentence!", "What is the name of the attribute you want to make primary key?");
     }
     return null;
@@ -34596,22 +33984,17 @@ function find_undo_name(input){
         while(match = regex_find_undo[i].exec(sentence_preprocessed)){
             let name_undo = match[1].charAt(0).toUpperCase() + match[1].slice(1);
             return name_undo;
-            /*if(check_if_noun(name_undo)){
-                return name_undo;
-            }*/
         }
     }
     if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to undo multi-valued!", input);
         }
-        //classes.swal_to_user("What is the name of the multi-valued attribute you want to undo?", "Please repeat your whole sentence!");
         toastr.error("Please repeat your whole sentence!","What is the name of the multi-valued attribute you want to undo?");
     }else{
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type to undo primary key!", input);
         }
-        //classes.swal_to_user("What is the name of the primary key attribute you want to undo?", "Please repeat your whole sentence!");
         toastr.error("Please repeat your whole sentence!","What is the name of the primary key attribute you want to undo?");
     }
     return null;
@@ -34637,7 +34020,6 @@ function find_rename_obj(input){
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of object to rename!", input);
     }
-    //classes.swal_to_user("What object do you want to rename?","Please repeat your whole sentence!");
     toastr.error("Please repeat your whole sentence!","What object do you want to rename?");
     return null;
 }
@@ -34658,7 +34040,6 @@ function find_delete_object(input){
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of object to delete!", input);
     }
-    //classes.swal_to_user("What object do you want to delete?","Please repeat your whole sentence!");
     toastr.error("Please repeat your whole sentence!","What object do you want to delete?");
     return null;
 }
@@ -34678,30 +34059,16 @@ function find_relationship_number(input){
                 number = 'N';
                 return [entity1, number, entity2]; 
             }else{
-                //console.log("What are the numbers for the relationship?");
                 if(class_buttons.do_log){
                     execute_ajax_error(class_buttons.user_id, "Couldn't identify numbers for relationship!", input);
                 }
                 return null;
             }
-            /*if(check_if_noun(entity1) && check_if_noun(entity2)){
-                return [entity1, number, entity2]; 
-            }else{
-                if(class_buttons.do_log){
-                    execute_ajax_error(class_buttons.user_id, "Couldn't identify entity-types for adding relationship numbers!", input);
-                }
-                //console.log('What are the names of the enitites to insert the numbers for the relatioship?');
-                //classes.swal_to_user("What are the names of the entity-types for updating number of relationship?", "Pleas repeat your whole sentence!")
-                toastr.error("Pleas repeat your whole sentence!","What are the names of the entity-types for updating number of relationship?");
-                return null;
-            }*/
         }
     }
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find numbers for relationship or entity names!", input);
     }
-    //console.log("What are the numbers for the relationship?");
-    //classes.swal_to_user("What are the numbers for the relationship?", "Pleas repeat your whole sentence!")
     toastr.error("Pleas repeat your whole sentence!","What are the numbers for the relationship?");
     return null;
 }
@@ -34718,7 +34085,6 @@ function find_relationship_name(input){
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of relationsship!", input);
     }
-    //classes.swal_to_user("What is the name of the relationship?", "Please include the name of the relationship in you whole sentence!");
     toastr.error("Please include the name of the relationship in you whole sentence!","What is the name of the relationship?");
     return null;
 }
@@ -34728,23 +34094,14 @@ function find_attribute_name(input){
     for(let i = 0; i < regex_find_attributes.length; i++){
         regex_find_attributes[i].lastIndex = 0;
         while(match = regex_find_attributes[i].exec(sentence_preprocessed)){
-            //if(check_if_noun(match[1])){
-                attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-                return attribute_name;
-            /*}else{
-                if(class_buttons.do_log){
-                    execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribut-type! Is not a noun!", input);
-                }
-                //classes.swal_to_user("Name of attribute isn't a noun!", "Please rephrase and repeat your sentence!")
-                toastr.error("Please rephrase and repeat your sentence!","Name of attribute isn't a noun!");
-                return null;
-            }*/
+            attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            return attribute_name;
+ 
         }
     }
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of attribute-type!", input);
     }
-    //classes.swal_to_user("What is the name of the Attribute?", "Please repeat in a whole sentence?");
     toastr.error("Please repeat in a whole sentence?","What is the name of the Attribute?");
     return null;
 }
@@ -34754,22 +34111,13 @@ function find_sub_attribute_name(input){
     for(let i = 0; i < regex_find_sub_attribute.length; i++){
         regex_find_sub_attribute[i].lastIndex = 0;
         while(match = regex_find_sub_attribute[i].exec(sentence_preprocessed)){
-            //if(check_if_noun(match[1])){
-                let sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-                return sub_attribute_name;
-            /*}else{
-                if(class_buttons.do_log){
-                    execute_ajax_error(class_buttons.user_id, "Couldn't find name of sub-attribute type! Must be a noun!", input);
-                }
-                //classes.swal_to_user("Name of sub attribute must be a noun!", "Please repeat in a whole sentence?");
-                toastr.error("Please repeat in a whole sentence?","Name of sub attribute must be a noun!");
-            }*/
+            let sub_attribute_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            return sub_attribute_name;
         }
     }
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Couldn't find name of sub attribute-type!", input);
     }
-    //classes.swal_to_user("Couldn't find name for sub attribute!", "Please repeat in a whole sentence?");
     toastr.error("Please repeat in a whole sentence?","Couldn't find name for sub attribute!");
 }
 
@@ -34780,31 +34128,13 @@ function find_entity_names(input, bool_for_rel){
         regex_find_entities[i].lastIndex = 0;
         while(match = regex_find_entities[i].exec(sentence_preprocessed)){
             if(match.length == 3){
-                //if(check_if_noun(match[1]) && check_if_noun(match[2])){
-                    entity_name1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-                    entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
-                    list_entity_names.push(entity_name1);
-                    list_entity_names.push(entity_name2);
-                /*}else{
-                    if(class_buttons.do_log){
-                        execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-types for creating relationsship! Entity-type names must be a noun!", input);
-                    }
-                    //classes.swal_to_user("What is the name of the entity types for the relationship?",null)
-                    toastr.error("","What is the name of the entity types for the relationship?");
-                }*/
+                entity_name1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+                entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
+                list_entity_names.push(entity_name1);
+                list_entity_names.push(entity_name2);
             }else{
-                //if(check_if_noun(match[1])){
-                    entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
-                    list_entity_names.push(entity_name);
-                /*}else{
-                    if(class_buttons.do_log){
-                        execute_ajax_error(class_buttons.user_id, "Couldn't find name of entity-type! Entity-type name must be a noun!", input);
-                    }
-                    //classes.swal_to_user("Name of entity must be a noun?",null);
-                    toastr.error("","Name of entity must be a noun?");
-                    list_entity_names.push(null);
-                    return list_entity_names;
-                }*/
+                entity_name = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+                list_entity_names.push(entity_name);
             }
         }
 
@@ -34815,13 +34145,11 @@ function find_entity_names(input, bool_for_rel){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find name for create entity-type!", input);
         }
-        //classes.swal_to_user("What is the name of the entity-type you want to create?",null);
         toastr.error("","What is the name of the entity-type you want to create?");
     }else if(set_entity_names[0] == null && input.indexOf('attribute') == -1 && bool_for_rel == true){
         if(class_buttons.do_log){
             execute_ajax_error(class_buttons.user_id, "Couldn't find names of entity-types to create relationship!", input);
         }
-        //classes.swal_to_user("Between what entity-types do you want to create a relationship?",'Please repeat whole sentence!');
         toastr.error('Please repeat whole sentence!',"Between what entity-types do you want to create a relationship?");
     }
     return set_entity_names;
@@ -34833,27 +34161,16 @@ function find_entities_for_isa(input){
     for(let i = 0; i < regex_find_isa.length; i++){
         regex_find_isa[i].lastIndex = 0;
         while(match = regex_find_isa[i].exec(sentence_preprocessed)){
-            //if(check_if_noun(match[1]) && check_if_noun(match[2])){
                 entity_name1 = match[1].charAt(0).toUpperCase() + match[1].slice(1);
                 entity_name2 = match[2].charAt(0).toUpperCase() + match[2].slice(1);
                 list_entity_names.push(entity_name1);
                 list_entity_names.push(entity_name2);
                 return list_entity_names;
-            /*}else{
-                if(class_buttons.do_log){
-                    execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type! Names must be a noun!", input);
-                }
-                //classes.swal_to_user("What are the names of the entity types for isa type? Names of entity-types must be a noun!",null);
-                toastr.error("","What are the names of the entity types for isa type? Names of entity-types must be a noun!");
-                list_entity_names.push(null);
-                return list_entity_names;
-            }*/
         }
     }
     if(class_buttons.do_log){
         execute_ajax_error(class_buttons.user_id, "Could not find names of entity-types to create isa-type!", input);
     }
-    //classes.swal_to_user("What are the names of the entity types for isa type?",null);
     toastr.error("","What are the names of the entity types for isa type?");
     return list_entity_names;
 }
@@ -34880,20 +34197,17 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1 || input.indexOf(' has an attribute ') != -1){
+    if(input.indexOf('create ') != -1 || ('creates ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1 || input.indexOf(' has an attribute ') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
-            //console.log('Entity will be created');
             let find_entity_for_rel = false;
             let param = find_entity_names(input,find_entity_for_rel);
-            //console.log('Name of Entity: ' + param[0]);
             if(class_buttons.do_log){
                 execute_ajax(class_buttons.user_id, "Create entity-type", input);
             }
             classes.create_entity_type(param[0]);
         //Create attributes
-        }else if(input.indexOf('sub attribute') == -1 && input.indexOf('attribute') != -1){
-            //console.log("Create Attribute");
+        }else if(input.indexOf('sub attribute') == -1 && input.indexOf('attribute') != -1){;
             let param_attribute = find_attribute_name(input);
             let param_entity = null;
             if(param_attribute != null){
@@ -34902,7 +34216,6 @@ function execute_speech(input){
             }
             //Create multi valued attribute
             if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
-                //console.log('Multi valued will be created');
                 let is_primary_key = false;
                 let is_multi_valued = true;
                 if(class_buttons.do_log){
@@ -34911,7 +34224,6 @@ function execute_speech(input){
                 classes.create_attribute_type(param_attribute, param_entity[0], is_primary_key, is_multi_valued);
             //Create attribute as primary key
             }else if(input.indexOf('primary key') != -1){
-                //console.log('Primary key will be created');
                 let is_primary_key = true;
                 let is_multi_valued = false;
                 if(class_buttons.do_log){
@@ -34920,7 +34232,6 @@ function execute_speech(input){
                 classes.create_attribute_type(param_attribute, param_entity[0], is_primary_key, is_multi_valued);
             //Create normal attribute
             }else{
-                //console.log('Attribute will be created');
                 let is_primary_key = false;
                 let is_multi_valued = false;
                 if(class_buttons.do_log){
@@ -34938,13 +34249,10 @@ function execute_speech(input){
                 execute_ajax(class_buttons.user_id, "Create sub attribute-type", input);
             }
             if (param_sub_attribute != null && param_attribute != null){
-                //console.log('Name Sub Attribute: ' + param_sub_attribute);
-                //console.log('Name Attribute: ' + param_attribute);
                 classes.create_sub_attribute_type(param_sub_attribute, param_attribute, param_entity[0]);
             }
         //create relationship
         }else if(input.indexOf('relationship') != -1 && input.indexOf('attribute') == -1){
-            //console.log('Relationship will be created');
             let param_relationship = find_relationship_name(input);
             let find_entity_for_rel = true;
             let param_entities = find_entity_names(input, find_entity_for_rel);
@@ -34952,9 +34260,6 @@ function execute_speech(input){
                 execute_ajax(class_buttons.user_id, "Create relationship-type", input);
             }
             if(param_relationship != null && param_entities != null && param_entities.length == 2){
-                //console.log("Name of relationship: " + param_relationship)
-                //console.log("Name of first Entity: " + param_entities[0]);
-                //console.log("Name of second Entity: " + param_entities[1]);
                 classes.create_relationship_type(param_relationship, param_entities[0], param_entities[1]);
             }
         }else{
@@ -34962,21 +34267,17 @@ function execute_speech(input){
         }
     //Create isa type
     }else if((input.indexOf('is a') != -1 || input.indexOf('inherits from') != -1 || input.indexOf('inherit from') != -1 || input.indexOf('is a child of') != -1) && (input.indexOf('primary key') == -1 && input.indexOf('multi valued') == -1) && input.indexOf('multi-valued') == -1 && input.indexOf('multivalued') == -1){
-        //console.log("Create isa type");
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Create isa-type", input);
         }
         let entities_for_isa = find_entities_for_isa(input,false);
         if(entities_for_isa[0] != null){
-            //console.log("Name of first Entity: " + entities_for_isa[0]);
-            //console.log("Name of second Entity: " + entities_for_isa[1]);
             classes.create_isa_type(entities_for_isa[0], entities_for_isa[1]);
         }else{
-            //classes.swal_to_user("Between what entity-types do you want to create an isa-type?", "Could not find entitiy-types!");
+            toastr.error("Could not find entitiy-types!","Between what entity-types do you want to create an isa-type?")
         }
     //Create value for label
     }else if(input.indexOf('several') != -1 || input.indexOf('multiple') != -1 || input.indexOf('a lot of') != -1 || input.indexOf('many') != -1 || input.indexOf('numerous') != -1 || input.indexOf('plenty of') != -1 || input.indexOf('one') != -1 || input.indexOf('1') != -1){
-        //console.log('Number relationship will be created');
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Update numbers for relationsship-type", input);
         }
@@ -34993,16 +34294,13 @@ function execute_speech(input){
         }
     //Update objects (change name)
     }else if(input.indexOf('update') != -1 || input.indexOf('change') != -1 || input.indexOf('rename') != -1){
-        //console.log('update');
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Rename element", input);
         }
         let params_rename = find_rename_obj(input);
-        //console.log(params_rename);
         classes.rename_object(params_rename[0], params_rename[1]);
     //Delet objects
     }else if (input.indexOf('delete') != -1 || input.indexOf('remove') != -1 || input.indexOf('cancel') != -1 || input.indexOf('drop ') != -1){
-        //console.log("Delete");
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Delete element", input);
         }
@@ -35015,13 +34313,11 @@ function execute_speech(input){
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo primary key", input);
                 }
-                //console.log("undo primary key");
                 let param_undo = find_undo_name(input);
                 if(param_undo != null){
                     classes.undo_primary_key(param_undo);
                 }
             }else if(input.indexOf('multi valued') != -1 || input.indexOf('single valued') || input.indexOf('multi-valued') != -1 || input.indexOf('single-valued') || input.indexOf('multivalued') != -1 || input.indexOf('singlevalued')){
-                //console.log("undo multi valued");
                 if(class_buttons.do_log){
                     execute_ajax(class_buttons.user_id, "Undo multivalued", input);
                 }
@@ -35030,7 +34326,8 @@ function execute_speech(input){
                     classes.undo_multi_valued(param_undo);
                 }
             }else{
-                //console.log("can't find attribute to undo action");
+                toastr.error("Can't find attribute to undo action!");
+                
             }
         //Make attribute multivalued or as primary key
         }else if((input.indexOf('make') != -1 && input.indexOf('not') == -1) || (input.indexOf('primary key') != -1 || input.indexOf('multi valued') != -1) || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
@@ -35044,7 +34341,6 @@ function execute_speech(input){
                     if(class_buttons.do_log){
                         execute_ajax(class_buttons.user_id, "Make attribute-type primary key", input);
                     }
-                    //console.log("Make attribute primary key!");
                     classes.make_primary_key(param_do);
                 }else if(input.indexOf('multi valued') != -1 || input.indexOf('multi-valued') != -1 || input.indexOf('multivalued') != -1){
                     if(class_buttons.do_log){
@@ -35056,11 +34352,9 @@ function execute_speech(input){
         }
     }
     else{
-        //console.log("Can't identify action");
         if(class_buttons.do_log){
             execute_ajax(class_buttons.user_id, "Could not identity any action!", input);
         }
-        //classes.swal_to_user("What do you want to do?", "Could not identify any action!");
         toastr.error("Could not identify any action!","What do you want to do?");
     }
 }
@@ -35070,15 +34364,587 @@ module.exports = {
 }
 
 
-},{"../node_modules/rita":8,"./classes":11,"./classes_buttons":12}],14:[function(require,module,exports){
+},{"../node_modules/rita":8,"./button_ER_Diagram":11,"./speech_ER_Diagram":13}],13:[function(require,module,exports){
+const class_buttons = require('./button_ER_Diagram');
+const levenshtein = require('js-levenshtein');
+
+const graph = class_buttons.graph;
+const paper = class_buttons.paper;
+
+
+//Helpers
+function get_levenshtein(word_input, name_object){
+    return [levenshtein(word_input, name_object)/get_length_of_shorter_word(word_input,name_object), name_object];
+}
+function get_length_of_shorter_word(word1, word2){
+    if(word1.length <= word2.length){
+        return word1.length;
+    }
+    return word2.length;
+}
+//Helper functions to find objects by name
+function find_entity_object_by_name(name_entity){
+    if(name_entity == null){
+        return null
+    }
+    let elementsList = graph.getElements();
+    let list_lev = [];
+    for(elm in elementsList){
+        let elementType = String(elementsList[elm].attributes.type);
+        if(elementType.includes("Entity")){
+            element_name = elementsList[elm].attr("text/text");
+            //Calculate difference between words
+            list_lev.push(get_levenshtein(name_entity, element_name));
+            if(element_name == name_entity){
+                return elementsList[elm];
+            }
+        }
+    }
+    //Didn't understand the right word from user input, takes the closest word instead (if there is one)
+    if(elementsList.length != 0){
+        list_lev.sort();
+        if(list_lev[0][0] >= 1){
+            return null;
+        }
+        let closest_word = list_lev[0][1];
+        let ent_obj = find_entity_object_by_name(closest_word);
+        return ent_obj;
+    }
+    return null;
+}
+function find_attribute_object_by_name(name_attribute){
+    let elementsList = graph.getElements();
+    let list_attr = [];
+    let list_lev = [];
+    for(elm in elementsList){
+        let elementType = String(elementsList[elm].attributes.type);
+        if(elementType.includes("Normal")){
+            element_name = elementsList[elm].attr("text/text");
+            list_lev.push(get_levenshtein(name_attribute, element_name));
+            if(element_name == name_attribute){
+                list_attr.push(elementsList[elm]);
+            }
+        }
+    }
+    
+    if(list_attr.length != null){
+        return list_attr;
+    }
+    list_lev.sort();
+    if(list_lev[0][0] >= 1){
+        return null;
+    }
+    let closest_word = list_lev[0][1];
+    let attr_obj = find_attribute_object_by_name(closest_word);
+    return [attr_obj];
+}
+
+function find_attribute_of_object(ent_obj, name_attribute){
+    let list_attrs = ent_obj.attributes.listChildren;
+    let list_lev = [];
+    for(attr_obj in list_attrs){
+        list_lev.push(get_levenshtein(name_attribute, list_attrs[attr_obj].attr("text/text")));
+        if(list_attrs[attr_obj].attr("text/text") == name_attribute){
+            return list_attrs[attr_obj];
+        }
+    }
+    list_lev.sort();
+    if(list_lev[0][0] >= 1){
+        return null;
+    }
+    let closest_word = list_lev[0][1];
+    let attr_obj = find_attribute_of_object(closest_word);
+    return attr_obj;
+}
+
+
+function find_object_by_name(name_object){
+    let elementsList = graph.getElements();
+    let match_elements = [];
+    let list_lev = [];
+    for(elm in elementsList){
+        let element_name = elementsList[elm].attr("text/text");
+        list_lev.push(get_levenshtein(name_object, element_name));
+        if(element_name == name_object){
+            match_elements.push(elementsList[elm]);
+        }
+    }
+    if(match_elements.length != 0){
+        return match_elements;
+    }
+    list_lev.sort();
+    let threshold_value_for_word_beiing_similar = 0.7;
+    if(list_lev[0][0] >= threshold_value_for_word_beiing_similar){
+        return null;
+    }
+    let closest_word = list_lev[0][1];
+    let obj_list = find_object_by_name(closest_word);
+    return obj_list;
+}
+function get_elements_by_id(id){
+    let elementsList = graph.getElements();
+    for(i in elementsList){
+        if(elementsList[i].id == id){
+            return elementsList[i];
+        }
+    }
+    return null;
+}
+
+function get_links_by_id(id){
+    let linksList = graph.getLinks();
+    for(i in linksList){
+        if(linksList[i].id == id){
+            return linksList[i];
+        }
+    }
+    return null;
+}
+
+//Functions for creating objects
+function create_isa_type(name_child, name_parent){
+    let child_ent = find_entity_object_by_name(name_child);
+    let parent_ent = find_entity_object_by_name(name_parent);
+    if(child_ent == null){
+        toastr.error("Please repeat your whole sentence!", "Could not find child entity-type named \"" + name_child + "\".");
+        return;
+    }
+    if(parent_ent == null){
+        toastr.error("Please repeat your whole sentence!", "Could not find paren entity-type named \"" + name_child + "\".");
+        return;
+    }
+    if(child_ent.attributes.inheritanceConnectionToParent.length == 0){
+        make_new_isa_connection(child_ent, parent_ent);
+    }else{
+        change_isa_connections(child_ent);
+        make_new_isa_connection(child_ent, parent_ent);
+    }
+}
+
+function create_entity_type(name_entity){
+    if(name_entity != null){
+        let ent_obj = new class_buttons.Entity;
+        ent_obj.attr("text/text", name_entity); 
+
+        ent_obj.position(Math.floor(Math.random() * (paper.getArea().width-150)),
+            Math.floor(Math.random() * (paper.getArea().height-65)));
+
+        graph.addCell(ent_obj);
+        class_buttons.highlightElement(ent_obj);
+        return;
+    }
+    toastr.error("Something wrong with create Entity type");
+}
+function create_attribute_type(name_attribute, name_entity, is_primary_key, is_multi_valued){
+    let list_entities = class_buttons.findAllEntities();
+    if(list_entities.length == 0){
+        if(name_entity == null){
+            toastr.error("","You need to create an entity-type first before adding an attribute-type!");
+            return;
+        }
+    }
+    let attr_obj = new class_buttons.Attribute();
+    attr_obj.attr("text/text", name_attribute); 
+    if(is_primary_key){
+        attr_obj.attr("text/text-decoration", "underline");
+    }
+    if(is_multi_valued){
+        makeAttributeMultivalued(attr_obj);
+    }
+
+    ent_obj = find_entity_object_by_name(name_entity);
+    if(ent_obj != null){
+        attr_obj.position(ent_obj.position().x-30+Math.floor(Math.random()*60),
+            ent_obj.position().y-30+Math.floor(Math.random()*60));
+        
+        attr_obj.attributes.parentObj = ent_obj.id;
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(ent_obj, attr_obj);
+        ent_obj.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    }else if(name_entity != null){
+        create_entity_type(name_entity);
+        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
+            currentElement.position().y-120+Math.floor(Math.random()*240));
+            
+        attr_obj.attributes.parentObj = currentElement.id;
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(currentElement, attr_obj);
+        currentElement.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    } else if(currentElement != null){
+        attr_obj.position(currentElement.position().x-120+Math.floor(Math.random()*240),
+            currentElement.position().y-120+Math.floor(Math.random()*240));
+            
+        attr_obj.attributes.parentObj = currentElement.id;
+
+        graph.addCell(attr_obj);
+        class_buttons.createLink(currentElement, attr_obj);
+        currentElement.attributes.listChildren.push(attr_obj.id);
+        class_buttons.highlightElement(attr_obj);
+    }else{
+        toastr.error("Pleas mention the name of the entity-type you want to create the attribute-type for aswell, or click on an element and repeat your sentence!");
+    }  
+}
+
+function create_sub_attribute_type(name_sub_attribute, name_attribute){
+    let list_attr = find_attribute_object_by_name(name_attribute);
+    if(list_attr.length == 0){
+        toastr.error( "Please repeat you sentence for creating a sub attribute-type!","Could not find attribute with name \"" + name_attribute + "\"");
+        return
+    }
+    //There is only one attribut with that name
+    else if(list_attr.length == 1){
+        let attr_obj = list_attr[0];
+        let sub_attr_obj = new class_buttons.Attribute();
+        sub_attr_obj.attr("text/text", name_sub_attribute);
+
+        sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
+            attr_obj.position().y-120+Math.floor(Math.random()*240));
+
+        sub_attr_obj.attributes.parentObj = attr_obj.id;
+
+        attr_obj.attributes.listChildren.push(sub_attr_obj.id);
+
+        graph.addCell(sub_attr_obj);
+        class_buttons.createLink(attr_obj,sub_attr_obj);
+        class_buttons.highlightElement(sub_attr_obj);
+        return;
+    }
+    //There are more attributes with that name
+    let attr_obj = null;
+
+    for(i in list_attr){
+        if(list_attr[i] == currentElement){
+            attr_obj = list_attr[i];
+        }
+    }
+    if(attr_obj == null){
+        toastr.error( "Please click on the attribute where you want to add a sub attribute!","There are multiple attributes with the name \"" + name_attribute + "\"");
+        return;
+    }
+
+    let sub_attr_obj = new class_buttons.Attribute();
+    sub_attr_obj.attr("text/text", name_sub_attribute);
+
+    sub_attr_obj.position(attr_obj.position().x-120+Math.floor(Math.random()*240),
+        attr_obj.position().y-120+Math.floor(Math.random()*240));
+
+    sub_attr_obj.attributes.parentObj = attr_obj.id;
+
+    attr_obj.attributes.listChildren.push(sub_attr_obj.id);
+
+    graph.addCell(sub_attr_obj);
+    class_buttons.createLink(attr_obj,sub_attr_obj);
+    class_buttons.highlightElement(sub_attr_obj);    
+}
+
+function create_relationship_type(name_relationship, name_entity_1, name_entity_2){
+    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
+    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
+    if(ent_obj_1 == null){
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
+        return;
+    }
+    if(ent_obj_2 == null){
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
+        return;
+    }
+
+    //Every entity-type knows their whole relationsships
+    let rel_obj = new class_buttons.Relationship();
+    rel_obj.attr("text/text", name_relationship);
+
+    rel_obj.position((ent_obj_1.position().x + ent_obj_2.position().x)/2, 
+        (ent_obj_1.position().y + ent_obj_2.position().y)/2);
+
+    graph.addCell(rel_obj);
+    class_buttons.highlightElement(rel_obj);
+
+    ent_obj_1.attributes.relationship_object.push([ent_obj_1.id, rel_obj.id, ent_obj_2.id]);
+    ent_obj_2.attributes.relationship_object.push([ent_obj_2.id, rel_obj.id, ent_obj_1.id]);
+    create_relationship_connection_1(rel_obj, ent_obj_1);
+    create_relationship_connection_2(rel_obj, ent_obj_2);
+    
+}
+
+function create_relationship_connection_1(curr_rel_obj, ent_obj){
+    let first_link = class_buttons.createLink(curr_rel_obj, ent_obj);
+    first_link.set(create_label("1"));
+    curr_rel_obj.attributes.firstConnectionLink = first_link.id;
+    curr_rel_obj.attributes.firstConnectionObject = ent_obj.id;
+}
+
+function create_relationship_connection_2(curr_rel_obj, ent_obj){
+    let second_link = class_buttons.createLink(curr_rel_obj, ent_obj);
+    second_link.set(create_label("1"));
+    curr_rel_obj.attributes.secondConnectionLink = second_link.id;
+    curr_rel_obj.attributes.secondConnectionObject = ent_obj.id;
+}
+let create_label = function(txt) {
+    return {
+        labels: [{
+            position: 0.3,
+            attrs: {
+                text: { dy: -8, text: txt+"\n", fill: '#000000' },
+                rect: { fill: 'none' }
+            }
+        }]
+    };
+};
+
+
+//Helpers to change appearance of objects
+function make_primary_key(name_attr){
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make primary key.");
+        return;
+    }
+    
+    if(attr_objs.length == 1){
+        attr_objs[0].attr("text/text-decoration", "underline");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            attr_objs[elm].attr("text/text-decoration", "underline"); 
+            elm_found = true;
+            break;
+        }
+    }
+    if(!elm_found){
+        toastr.error('Please click on the attribute you want to make as primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
+    }
+}
+function undo_primary_key(name_attr){
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo primary key.");
+        return;
+    }
+    if(attr_objs.length == 1){
+        attr_objs[0].attr("text/text-decoration", "none");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            attr_objs[elm].attr("text/text-decoration", "none"); 
+            elm_found = true;
+            break;
+        }
+    }
+    if(!elm_found){
+        toastr('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
+    }
+}
+
+function make_multi_valued(name_attr){
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to make multi valued.");
+        return;
+    }
+    if(attr_objs.length == 1){
+        makeAttributeMultivalued(attr_objs[0]);
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            makeAttributeMultivalued(attr_obj[elm]);
+            elm_found = true;
+            break;
+        }
+    }
+    if(!elm_found){
+        toastr.error('Please click on the attribute you want to make multi valued and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\"");
+    }
+}
+function undo_multi_valued(name_attr){
+    let attr_objs = find_attribute_object_by_name(name_attr);
+    let elm_found = false;
+    if(attr_objs == null){
+        toastr.error('Please repeat your whole sentence!','Could not find attribute with name \"' + name_attr +"\" to undo multi valued.");
+        return; 
+    }
+    if(attr_objs.length == 1){
+        attr_objs[0].attr(".inner/display", "none");
+        attr_objs[0].attr(".outer/stroke", "#ffcb63");
+        return;
+    }
+    for(elm in attr_objs){
+        if(attr_objs[elm] == currentElement){
+            attr_objs[0].attr(".inner/display", "none");
+            attr_objs[0].attr(".outer/stroke", "#ffcb63"); 
+            elm_found = true;
+            break;
+        }
+    }
+    if(!elm_found){
+        toastr.error('Please click on the attribute you want to undo primary key and repeat your sentence!','There are multiple attributes with the name \"' + name_attr +"\".");
+    }
+}
+function rename_object(old_name, new_name){
+    let old_objects = find_object_by_name(old_name);
+    let elm_found = false;
+    if(old_objects == null){
+        toastr.error('Please repeat your whole sentence!','Could not find element \"' + old_name +"\" to rename.");
+        return;
+    }
+    if(old_objects.length == 1){
+        let obj = old_objects[0];
+        obj.attr('text/text', new_name);
+        return;
+    }
+    for(elm in old_objects){
+        if(old_objects[elm] == currentElement){
+            let obj = old_objects[elm];
+            obj.attr('text/text', new_name);
+            elm_found = true;
+            break;
+        }
+    }
+    if(!elm_found){
+        toastr.error('There are multiple objects with the name \"' + old_name +"\".",'Please click on the object you want to rename and repeat your sentence!');
+    }
+    
+}
+function delete_object(name_object){
+    let del_obj_list = find_object_by_name(name_object);
+    let found_elm = false;
+    if(del_obj_list == null){
+        toastr.error("Can't delete object!","There is no object called \"" + name_object + "\".");
+    }else if(del_obj_list.length == 1){
+        class_buttons.deleteElement(del_obj_list[0]);
+    }else{
+        for(elm in del_obj_list){
+            if(del_obj_list[elm] == currentElement){
+                class_buttons.deleteElement(del_obj_list[elm]);
+                found_elm = true;
+                break;
+            }
+        }
+        if(found_elm == false){
+            toastr.error("Please click on the object you want to delete and repeat your sentence!","There are multiple objects with the name \"" + name_object + "\".");
+        }
+    }  
+}
+
+function makeAttributeMultivalued(attr_obj){
+    attr_obj.attr(".inner/display", "block");
+    attr_obj.attr(".inner/fill", "#ffcb63");
+    attr_obj.attr(".inner/stroke", "#797d9a");
+    attr_obj.attr(".outer/stroke", "#797d9a");
+}
+function add_label_to_connection(name_entity_1, val_number, name_entity_2){
+    let ent_obj_1 = find_entity_object_by_name(name_entity_1);
+    let ent_obj_2 = find_entity_object_by_name(name_entity_2);
+    let rel_obj;
+    let list_relationships = ent_obj_1.attributes.relationship_object;
+
+    for(rel in list_relationships){
+        if(get_elements_by_id(list_relationships[rel][2]) == ent_obj_2){
+            rel_obj = get_elements_by_id(list_relationships[rel][1]);
+        }
+    }
+    if(get_elements_by_id(rel_obj.attributes.firstConnectionObject) == ent_obj_2){
+        let link_to_change_val  = get_links_by_id(rel_obj.attributes.firstConnectionLink);
+        let link = get_links_by_id(rel_obj.attributes.secondConnectionLink);
+        let updated_value = check_and_update_label(link, val_number);
+        link_to_change_val.set(create_label(updated_value));
+    }else{
+        let link_to_change_val = get_links_by_id(rel_obj.attributes.secondConnectionLink);
+        let link = get_links_by_id(rel_obj.attributes.firstConnectionLink);
+        let updated_value = check_and_update_label(link, val_number);
+        link_to_change_val.set(create_label(updated_value));
+    }
+}
+
+function check_and_update_label(link, value_to_insert){
+   let value_label = link.attributes.labels[0].attrs.text.text;
+   if(value_to_insert == '1' && value_label == "M\n"){
+        link.set(create_label("N"));
+        return value_to_insert;
+   }else if(value_to_insert == 'N' && value_label == "N\n"){
+        value_to_insert = "M";
+        return value_to_insert;
+    }else{
+        return value_to_insert;
+    }
+}
+
+function make_new_isa_connection(child_ent, parent_ent){
+    let isa = new class_buttons.ISA;
+    isa.position(parent_ent.position().x + 40, parent_ent.position().y +45);
+    graph.addCell(isa);
+    isa_link = class_buttons.createLink(child_ent, isa);
+    
+    parent_ent.attributes.isParentEntity = true;
+    let inheritance_connection_to_child = [child_ent.id,isa.id,isa_link.id];
+    
+    parent_ent.attributes.inheritanceConnectionsToChildren.push(inheritance_connection_to_child);
+
+    child_ent.attributes.inheritanceConnectionToParent.push(parent_ent.id,isa.id,isa_link.id);
+}
+
+function change_isa_connections(child_ent){
+    let parent_ent = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[0]);
+    let isa = get_elements_by_id(child_ent.attributes.inheritanceConnectionToParent[1]);
+    let isa_link = get_links_by_id(child_ent.attributes.inheritanceConnectionToParent[2]);
+    
+    graph.removeCells(isa,isa_link);
+    
+    child_ent.attributes.inheritanceConnectionToParent = [];
+    
+    parent_ent.attributes.inheritanceConnectionsToChildren = remove_connection_from_child_list(child_ent, parent_ent.attributes.inheritanceConnectionsToChildren);
+    if(parent_ent.attributes.inheritanceConnectionsToChildren.length == 0){
+        parent_ent.attributes.isParentEntity = false;
+    }
+}
+
+function remove_connection_from_child_list(elm, list){
+    let index = find_index_of_child_entity(elm,list);
+    list.splice(index,1);
+    return list;
+}
+
+function find_index_of_child_entity(elm, listOfLists){
+    index = 0;
+    for(listElement in listOfLists){
+        if(get_elements_by_id(listOfLists[listElement][0]) == elm){
+            return index;
+        }else{
+            index +=1;
+        }
+    }
+}
+
+module.exports = {
+    create_entity_type: create_entity_type,
+    create_attribute_type: create_attribute_type,
+    create_relationship_type: create_relationship_type,
+    add_label_to_connection: add_label_to_connection,
+    create_sub_attribute_type: create_sub_attribute_type,
+    create_isa_type: create_isa_type,
+    delete_object: delete_object,
+    rename_object: rename_object,
+    make_primary_key: make_primary_key,
+    undo_primary_key: undo_primary_key,
+    make_multi_valued: make_multi_valued,
+    undo_multi_valued: undo_multi_valued,
+}
+},{"./button_ER_Diagram":11,"js-levenshtein":6}],14:[function(require,module,exports){
 const classifier = require('./classifier');
 
 const textbox = document.getElementById("textbox");
 const micBtn = document.getElementById("voiceButton");  
 
 const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-
 const recognition = new speechRecognition();
 
 recognition.interimResults = true;
@@ -35111,13 +34977,11 @@ function start_or_stop_recording(){
 
 
 
-function start_speech_recognition(){
-    //console.log("started speech recognition");    
+function start_speech_recognition(){ 
     recognition.start();
     }
     
 function stop_speech_recognition(){
-    //console.log("stopped speech recognition"); 
     recognition.stop();
 }
 
@@ -35130,8 +34994,6 @@ function startSpeechRecognition(){
 
 recognition.addEventListener("end", endSpeechRecognition);
 function endSpeechRecognition(){
-    //console.log("Speech Recognition disconnected");
-    //console.log(fianl_transcript);
     classifier.execute_speech(fianl_transcript);
 }
 
@@ -35152,4 +35014,4 @@ function resultOfSpeechRecognition(event){
     }
     fianl_transcript = textbox.value;
 }
-},{"./classifier":13}]},{},[14]);
+},{"./classifier":12}]},{},[14]);
