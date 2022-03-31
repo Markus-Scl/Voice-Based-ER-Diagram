@@ -20,6 +20,7 @@ dict_replace['38'] = "create";
 dict_replace['8'] = "create";
 dict_replace['3 8'] = "create";
 dict_replace['3/8'] = "create";
+dict_replace['creates'] = "create";
 dict_replace['a tribute'] = "attribute";
 dict_replace[' s '] = " as ";
 dict_replace['up a tribute'] = "sub attribute";
@@ -307,7 +308,7 @@ function execute_ajax_error(user_id, err, user_input){
 function execute_speech(input){
     input = replace_common_mistakes(input, dict_replace);
     //Create new Object
-    if(input.indexOf('create ') != -1 || ('creates ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1 || input.indexOf(' has an attribute ') != -1){
+    if(input.indexOf('create ') != -1 || input.indexOf('insert ') != -1 || input.indexOf('draw ') != -1 || input.indexOf('paint ') != -1 || input.indexOf('add ') != -1 || input.indexOf(' has the attribute ') != -1 || input.indexOf(' has attribute ') != -1 || input.indexOf(' has an attribute ') != -1){
         //Create entity type
         if(input.indexOf('entity') != -1 && input.indexOf('attribute') == -1 && input.indexOf('relationship') == -1){
             let find_entity_for_rel = false;

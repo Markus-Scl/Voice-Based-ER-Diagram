@@ -36,7 +36,7 @@ function find_entity_object_by_name(name_entity){
     //Didn't understand the right word from user input, takes the closest word instead (if there is one)
     if(elementsList.length != 0){
         list_lev.sort();
-        if(list_lev[0][0] >= 1){
+        if(list_lev[0][0] >= 0.5){
             return null;
         }
         let closest_word = list_lev[0][1];
