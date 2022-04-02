@@ -33583,7 +33583,7 @@ function deleteElement(elm){
     if(type.includes("click")){
         elm = currentElement;
     }
-    if(currentElement != null){
+    if(elm != null){
         let elementType = String(elm.attributes.type);
         //Delete Entity and all it's children attributes
         if(elementType.includes("Entity")){
@@ -33707,8 +33707,8 @@ function findIndexInList(elm, list){
 }
 
 function deleteRelationship(elm){
-    let firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    let secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let firstLink = get_links_by_id(elm.attributes.firstConnectionLink);
+    let secondLink = get_links_by_id(elm.attributes.secondConnectionLink);
 
     graph.removeCells(firstLink);
     graph.removeCells(secondLink);
@@ -33896,7 +33896,7 @@ const class_buttons = require('./button_ER_Diagram');
 const regex_find_entities = [/([a-z]+) has ?(?:the|an)? attribute/g, /([a-z]+) as entity ?(?:type)?/g, /entity ?(?:type)? ?(?:named|called)? ([a-z]+)/g, /between ?(?:entity)? ?(?:type)? ([a-z]+) and ?(?:entity)? ?(?:type)? ([a-z]+)/g,/for ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_attributes = [/(?:create|add|draw|paint|insert) ([a-z]+ ?([a-z]+)?) as attribute ?(?:type)?/g, /(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?) (?:for|to)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? (.*)? (?:as)/g,/(?<!sub )attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g,/for ?(?:attribute)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_sub_attribute = [/(?:named|called)? ([a-z]+ ?([a-z]+)?) as sub attribute ?(?:type)?/g, /sub attribute ?(?:type)? ?(?:named|called)? ([a-z]+ ?([a-z]+)?)/g];
-const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];//hier g geaddet
+const regex_find_relationship = [/relationship ?(?:type)? ?(?:named|called)? (.*)? (?:between|for)/g, /(?:between|for) .*? relationship ?(?:type)? ?(?:named|called)? (.*)?/g, /relationship ?(?:type)? ?(?:named|called)? (.*)? (!between )/g];
 const regex_find_number_relationship = [/ ?(?:one|1|a lot of|many|several|multiple|a|n|m|each)? ?(?:entity)? ?(?:type)? ?(?:named |called )?([a-z]+) .*? (one|1|a lot of|many|several|multiple|a|n|m) ?(?:times)? ?(?:in)? ?(?:a)? ?(?:entity)? ?(?:type|types)? ?(?:named|called)? ([a-z]+)/g];
 const regex_find_isa = [/(?:entity)? ?(?:type)? ?(?:named|called)? ?([a-z]+) (?:is a child of|is a|inherits from|inherit from|) ?(?:entity)? ?(?:type)? ?(?:named|called)? ([a-z]+)/g];
 const regex_delete_object = [/ ?(?:the)? ?(?:entity|attribute|sub attribute|relationship|entitytype)? ?(?:type)? ?(?:named|called)? (.*)?/g];

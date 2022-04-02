@@ -929,7 +929,7 @@ function deleteElement(elm){
     if(type.includes("click")){
         elm = currentElement;
     }
-    if(currentElement != null){
+    if(elm != null){
         let elementType = String(elm.attributes.type);
         //Delete Entity and all it's children attributes
         if(elementType.includes("Entity")){
@@ -1053,8 +1053,8 @@ function findIndexInList(elm, list){
 }
 
 function deleteRelationship(elm){
-    let firstLink = get_links_by_id(currentElement.attributes.firstConnectionLink);
-    let secondLink = get_links_by_id(currentElement.attributes.secondConnectionLink);
+    let firstLink = get_links_by_id(elm.attributes.firstConnectionLink);
+    let secondLink = get_links_by_id(elm.attributes.secondConnectionLink);
 
     graph.removeCells(firstLink);
     graph.removeCells(secondLink);
