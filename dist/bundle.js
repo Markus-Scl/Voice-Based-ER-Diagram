@@ -34650,7 +34650,7 @@ function create_relationship_type(name_relationship, name_entity_1, name_entity_
         return;
     }
     if(ent_obj_2 == null){
-        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_1 + "\" for creating a relationship.");
+        toastr.error("Please repeat your whole sentence!","Could not find entity-type named \"" + name_entity_2 + "\" for creating a relationship.");
         return;
     }
 
